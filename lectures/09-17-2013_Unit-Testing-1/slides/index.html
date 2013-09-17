@@ -52,7 +52,7 @@
             <li>Introduction
             <li>Format of class will be topic lectures followed by group exercises, separated by breaks  
             <li>The final hour will be spent working on your projects
-            <li>For credit, attend 8 at least of the 10 classes and present a project
+            <li>For credit, attend at least 8 of the 10 classes and present a project
             <li>Please sign the attendance sheet every class
         </ul>
         <p>To view the slides, you can either browse to the location of your git checkout, or serve it with the Python webserver:
@@ -102,6 +102,10 @@ python -m SimpleHTTPServer
 </section>
 
 <section class="slide">
+    <h1>Example application, calculator.py</h1>
+</section>
+
+<section class="slide">
     <h2>High level functional testing</h2>
 
     <p>Examples of this type of testing include:
@@ -132,10 +136,6 @@ python -m SimpleHTTPServer
 </section>
 
 <section class="slide">
-    <h1>Example application, calculator.py</h1>
-</section>
-
-<section class="slide">
     <h2>Unit testing</h2>
     <ul>
         <li>Test smallest individual units of source code
@@ -154,6 +154,7 @@ python -m SimpleHTTPServer
         <li>nose, a test runner which integrates with unittest
         <li>mock, an object mocking library.  Ships with Python 3.3+
     </ul>
+    <p><a target="_blank" href="http://docs.python.org/2/library/unittest.html">http://docs.python.org/2/library/unittest.html</a>
     <p><a target="_blank" href="http://nose.readthedocs.org/en/latest/">http://nose.readthedocs.org/en/latest/</a>
     <p><a target="_blank" href="http://www.voidspace.org.uk/python/mock/">http://www.voidspace.org.uk/python/mock/</a>
     
@@ -173,6 +174,12 @@ python -m SimpleHTTPServer
     <p>
         <a target="_blank" href="http://docs.python.org/2/library/unittest.html">http://docs.python.org/2/library/unittest.html</a>
     </p>
+</section>
+
+<section class="slide">
+    <h2>Looking at a large test suite</h2>
+    <p>Django is a popular Python web framework, with an extensive test suite</p>
+    <p>Looking under the hood, it is a collection of short unit tests organized into unittest sites.</p>
 </section>
 
 <section class="slide">
@@ -298,7 +305,7 @@ unittest.TextTestRunner(verbosity=2).run(suite)
     <h2>nose</h2>
     <p>A test runner which autodiscovers test cases 
     <p>Nose will find tests for you so you can focus on writing tests, not maintaining test suites
-    <p>Any file matching the testMatch conditions will be searched for tests.  They can't be executable!
+    <p>Any file matching the testMatch conditions* will be searched for tests.  They can't be executable!
 
 <p>Running your tests is as easy as
 <pre><code>
@@ -318,6 +325,7 @@ $ nosetests --processes=5
 </code></pre>
 
 <p><a target="_blank" href="https://nose.readthedocs.org/en/latest/finding_tests.html">https://nose.readthedocs.org/en/latest/finding_tests.html</a>
+<p style="text-size:.5em">*defined as self.testMatch = re.compile(r'(?:^|[\\b_\\.%s-])[Tt]est' % os.sep)</p>
 </section>
 
 <section class="slide">
@@ -330,12 +338,6 @@ $ nosetests --processes=5
     nosetests calculator_test.py:TestCalculatorFunctions.test_add
     </code></pre>
     </p>
-</section>
-
-<section class="slide">
-    <h2>Looking at a large test suite</h2>
-    <p>Django is a popular Python web framework, with an extensive test suite</p>
-    <p>Looking under the hood, it is a collection of short unit tests organized into unittest sites.</p>
 </section>
 
 <section class="slide">
