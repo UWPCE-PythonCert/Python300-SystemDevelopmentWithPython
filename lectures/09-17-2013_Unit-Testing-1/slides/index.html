@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+	<title>Isilon System Development with Python, Week 1</title>
+	
+	<!-- Required stylesheet -->
+	<link rel="stylesheet" href="core/deck.core.css">
+	
+	<!-- Extension CSS files go here. Remove or add as needed. -->
+	<link rel="stylesheet" href="extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="extensions/status/deck.status.css">
+	<link rel="stylesheet" href="extensions/hash/deck.hash.css">
+	<link rel="stylesheet" href="extensions/scale/deck.scale.css">
+
+	<!-- Style theme. More available in /themes/style/ or create your own. -->
+    <!-- default
+	<link rel="stylesheet" href="themes/style/neon.css">
+    -->
+	<link rel="stylesheet" href="themes/style/web-2.0.css">
+
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+    <!--
+	<link rel="stylesheet" href="themes/transition/fade.css">
+    -->
+	<link rel="stylesheet" href="themes/transition/horizontal-slide.css">
+	
+	<!-- Required Modernizr file -->
+	<script src="modernizr.custom.js"></script>
+</head>
+<body class="deck-container">
+
+
+<section class="slide">
+	<h2>System Development with Python</h2>
+    <h3>Week 1, Unit Testing</h3>
+    <p>September 16, 2013</p>
+    <p>Joseph Sheedy</p>
+    <p><i>joseph.sheedy@gmail.com</i></p>
+    <p>Git repository:  <a href="https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython" target="_blank">https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython</a></p>
+</section>
+
+<section class="slide">
+    <h2>Welcome to System Development with Python</h2>
+        <ul>
+            <li>Introduction
+            <li>Format of class will be topic lectures followed by group exercises, separated by breaks  
+            <li>The final hour will be spent working on your projects
+            <li>For credit, attend 8 at least of the 10 classes and present a project
+            <li>Please sign the attendance sheet every class
+        </ul>
+        <p>To view the slides, you can either browse to the location of your git checkout, or serve it with the Python webserver:
+<pre>
+<code>
+python -m SimpleHTTPServer
+</code>
+</pre>
+        
+</section>
+
+<section class="slide">
+    <h2>Class schedule</h2>
+<table>
+    <tr>
+        <th>Week</th><th>   Date </th><th>  Topic </th><th> Contents</th>
+    </tr>
+<tr> <td>1</td><td>   9/17 </td><td>   Unit Testing</td><td>  unittest, nose, pytest</td> </tr>
+<tr><td>2</td><td>   9/24  </td><td>  Unit Testing   Decorators  </td><td>decorators for testing/debugging <br /> <span style="color: blue">(project proposals due)</span></tr>
+<tr><td>3 </td><td>  10/1 </td><td>   Debugging  </td><td> pdb, IDEs </tr>
+<tr><td>4 </td><td>  10/8   </td><td> Relational Databases (SQL)  </td><td> DB API for SQLite, MySQL, Postgres  <br /><span style="color: blue">(high-level design due)</span></tr>
+<tr><td>5 </td><td>  10/15 </td><td>  Advanced OO </td><td>mixins, super(), __new__, metaclasses, properties</tr>
+<tr><td>6  </td><td> 10/22  </td><td> Extensions (leveraging C libraries)  </td><td>  C API, ctypes, cython, SWIG  <br /><span style="color: blue">(test plans due)</span></tr>
+<tr><td>7  </td><td> 10/29  </td><td> Threading and Multiprocessing </td><td>threading/multiprocessing   distributed processing</tr>
+<tr><td>8   </td><td>11/5  </td><td>  Profiling and Performance Tuning  </td><td> </td> </tr>
+<tr><td>9  </td><td> 11/12  </td><td> Student Presentations</td><td><span style="color: blue">(projects due)</span> </td></tr>
+<tr><td>10  </td><td>11/19  </td><td> Student Presentations<td> </td> </tr>
+</table>
+
+
+
+</section>
+
+<section class="slide">
+	<h2>What is testing?</h2>
+
+    <p>Code which runs your application in as close to a real environment as feasible
+    <p>Important for all languages, but especially dynamic interpreted languages like Python 
+    <p>A quest for 100% code coverage
+    <p>Levels of testing:
+        <ul>
+            <li>Black box / White box testing
+            <li>High level system tests
+            <li>Integration tests
+            <li>Unit tests
+        </ul>
+</section>
+
+<section class="slide">
+    <h2>High level functional testing</h2>
+
+    <p>Examples of this type of testing include:
+        <ul>
+            <li id="selenium" class="selenium_class">Selenium</li>
+            <li>manual scripts</li>
+            <li>shell scripts</li>
+            <li>Automator</li>
+        </ul> 
+
+    <p>Benefits</p>
+    <ul>
+        <li>Drives the application from the user's perspective
+        <li>Easier to define up front from product requirements
+        <li>Possibly more resilient to refactor
+    </ul>
+
+    <p>Why this isn't enough</p>
+    <ul>
+        <li>As number of components increases, testing all possible cases becomes unweildy
+        <li>Often slow
+        <li>Requires integrated application
+    </ul>
+
+    <p>
+        <a target="_blank" href="http://selenium-python.readthedocs.org/en/latest/api.html">http://selenium-python.readthedocs.org/en/latest/api.html</a>
+    </p>
+</section>
+
+<section class="slide">
+    <h1>Example application, calculator.py</h1>
+</section>
+
+<section class="slide">
+    <h2>Unit testing</h2>
+    <ul>
+        <li>Test smallest individual units of source code
+        <li>Tests should be independent of each other
+        <li>Easier to separate from required resources through fixtures and mocking
+        <li>Automatable
+        <li>Integrates with development process
+    </ul>
+</section>
+
+<section class="slide">
+	<h2>Testing with Python</h2>
+    <p>Unit testing tools
+    <ul>
+        <li>unittest, the test framework that ships with Python.  Started life as PyUnit.
+        <li>nose, a test runner which integrates with unittest
+        <li>mock, an object mocking library.  Ships with Python 3.3+
+    </ul>
+    <p><a target="_blank" href="http://nose.readthedocs.org/en/latest/">http://nose.readthedocs.org/en/latest/</a>
+    <p><a target="_blank" href="http://www.voidspace.org.uk/python/mock/">http://www.voidspace.org.uk/python/mock/</a>
+    
+
+</section>
+
+<section class="slide">
+    <h2>unittest module</h2>
+    <p>unittest ships with the Python standard library
+    <p>Supports these concepts of unit testing
+    <ul>
+        <li>fixtures
+        <li>test cases
+        <li>test suites
+        <li>test runner
+    </ul>
+    <p>
+        <a target="_blank" href="http://docs.python.org/2/library/unittest.html">http://docs.python.org/2/library/unittest.html</a>
+    </p>
+</section>
+
+<section class="slide">
+    <h2>unittest.TestCase anatomy</h2>
+    <p>create a new subclass of unittest.TestCase
+    <p>name test methods test_foo so the test runner finds them
+    <p>make calls to the self.assert* family of methods to validate results
+
+</section>
+
+<section class="slide">
+    <h2>assert methods</h2>
+    <p>
+    <ul>
+        <li>assertEqual(first, second, msg=None)
+        <li>assertNotEqual(first, second, msg=None)
+        <li>assertTrue(expr, msg=None)
+        <li>assertFalse(expr, msg=None)
+        <li>assertRaises(exc, fun, msg=None, *args, **kwargs)
+    </ul>
+    <p>
+        See a full list at
+        <a target="_blank" href="http://docs.python.org/2/library/unittest.html#assert-methods">http://docs.python.org/2/library/unittest.html#assert-methods</a> or dir(unittest.TestCase)
+    </p>
+
+</section>
+
+<section class="slide">
+    <h2>Setting up your tests for success (or failure!)</h2>
+    <p>setUp / tearDown - these are run before and after each test_ method
+    <p>setUpClass / tearDownClass - these are run before/after each TestCase
+    <p>setUpModule / tearDownModule - run before/after each TestSuite
+    <p>(new in Python 2.7) addCleanup / doCleanups - called after tearDown, in case a test throws an exception
+
+</section>
+
+
+<section class="slide">
+    <h2>Testing floating point values</h2>
+    <p>Why can't we just test if .5 == .5 ?
+    
+    <pre>
+    <code>
+3*.15 == .45
+Out[19]: False
+
+In [24]: 3*.15 * 10 / 10  == .45
+Out[24]: True
+    </code>
+    </pre>
+
+    <p>assertAlmostEqual to the rescue!
+
+</section>
+
+<section class="slide">
+    <h2>Running your tests</h2>
+    <p>Call unittest.main() right in your module
+<pre><code>
+if __name__ == "__main__":
+    unittest.main()
+</code></pre>
+    <p>That will get cumbersome with many TestCases, so organize the tests into a test suite</p>
+</section>
+
+<section class="slide">
+    <h2>nose</h2>
+    <p>extends unittest
+    <p>nose will find tests for you so you can focus on writing tests, not maintaining test suites
+    <p>any file matching the testMatch conditions will be searched for tests.  They can't be executable!
+
+<p>running your tests is as easy as
+<pre><code>
+$ nosetests
+</code></pre>
+<p>Lots of plugins for nose, such as code coverage:
+<pre><code>
+$ nosetests --with-coverage
+</code></pre>
+<p>or dropping into the debugger on failure
+<pre><code>
+$ nosetests --pdb
+</code></pre>
+<p>or parallel processing
+<pre><code>
+$ nosetests --processes=5
+</code></pre>
+
+<p><a target="_blank" href="https://nose.readthedocs.org/en/latest/finding_tests.html">https://nose.readthedocs.org/en/latest/finding_tests.html</a>
+</section>
+
+<section class="slide">
+    <h2>Looking at a large test suite</h2>
+</section>
+
+<section class="slide">
+    <h2>Doctests</h2>
+    <p>Tests placed in docstrings to demonstrate usage of a component to a human in a machine testable way</p>
+<pre><code>
+def square(x):
+    """Squares x.
+
+    >>> square(2)
+    4
+    >>> square(-2)
+    4
+    """
+
+    return x * x
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+
+</code></pre>
+<p>As of Python 2.6, the __main__ check is unnecessary:
+<pre><code>
+python -m doctest -v example.py
+</pre></code>
+<p>Now generate documentation, using epydoc for example:
+<pre><code>
+$ epydoc example.py
+</pre></code>
+
+<p><a target="_blank" href="http://docs.python.org/2/library/doctest.html">http://docs.python.org/2/library/doctest.html</a>
+<p><a target="_blank" href="http://www.python.org/dev/peps/pep-0257/">http://www.python.org/dev/peps/pep-0257/</a>
+<p><a target="_blank" href="http://epydoc.sourceforge.net/">http://epydoc.sourceforge.net/</a>
+<p><a target="_blank" href="http://sphinx-doc.org/">http://sphinx-doc.org/</a>
+<p><a target="_blank" href="http://www.doxygen.org">http://www.doxygen.org</a>
+
+</section>
+
+<section class="slide">
+    <h2>Exercises</h2>
+    <ul>
+        <li>Add unit tests for each method in calculator_functions.py
+        <li>Add setUp/tearDown methods and setUpClass/tearDownClass class methods.  Are they doing what you expect?
+        <li>Add additional unit tests for floating point calculations
+        <li>Fix any failures in the code
+        <li>Add doctests to calculator_functions.py
+    </ul>
+</section>
+
+<section class="slide">
+    <h1>Questions?</h1>
+</section>
+
+<!-- End slides. -->
+
+
+<!-- Begin extension snippets. Add or remove as needed. -->
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+<!-- End extension snippets. -->
+
+
+<!-- Required JS files. -->
+<script src="jquery-1.7.2.min.js"></script>
+<script src="core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="core/deck.core.js"></script>
+<script src="extensions/hash/deck.hash.js"></script>
+<script src="extensions/menu/deck.menu.js"></script>
+<script src="extensions/goto/deck.goto.js"></script>
+<script src="extensions/status/deck.status.js"></script>
+<script src="extensions/navigation/deck.navigation.js"></script>
+<script src="extensions/scale/deck.scale.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+	$(function() {
+		$.deck('.slide');
+	});
+</script>
+</body>
+</html>
