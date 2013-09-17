@@ -121,9 +121,9 @@ python -m SimpleHTTPServer
 
     <p>Why this isn't enough</p>
     <ul>
-        <li>As number of components increases, testing all possible cases becomes unweildy
-        <li>Often slow
-        <li>Requires integrated application
+        <li>As number of components increases, number of possible cases for the black box tests increase geometrically
+        <li>Can be slow
+        <li>Requires the developer to have a full integrated application
     </ul>
 
     <p>
@@ -181,16 +181,33 @@ python -m SimpleHTTPServer
     <p>name test methods test_foo so the test runner finds them
     <p>make calls to the self.assert* family of methods to validate results
 
+    <p>
+<pre><code>
+import unittest
+
+class TestTest(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_add(self):
+        self.assertEqual(2+2, 4)
+
+    def test_len(self):
+        self.assertEqual(len('foo'), 3)
+
+</code></pre>
 </section>
 
 <section class="slide">
     <h2>assert methods</h2>
-    <p>
+    <p>TestCase contains a number of methods named assert* which can be used for validation, here are a few common ones:
     <ul>
         <li>assertEqual(first, second, msg=None)
         <li>assertNotEqual(first, second, msg=None)
         <li>assertTrue(expr, msg=None)
         <li>assertFalse(expr, msg=None)
+        <li>assertIn(first, second)
         <li>assertRaises(exc, fun, msg=None, *args, **kwargs)
     </ul>
     <p>
@@ -201,11 +218,16 @@ python -m SimpleHTTPServer
 </section>
 
 <section class="slide">
-    <h2>Setting up your tests for success (or failure!)</h2>
-    <p>setUp / tearDown - these are run before and after each test_ method
-    <p>setUpClass / tearDownClass - these are run before/after each TestCase
-    <p>setUpModule / tearDownModule - run before/after each TestSuite
-    <p>(new in Python 2.7) addCleanup / doCleanups - called after tearDown, in case a test throws an exception
+    <h2>Fixtures: Setting up your tests for success (or failure!)</h2>
+    <p>Test fixtures are a fixed baseline for tests to run from consistently, also known as test context
+    <p>Fixtures can be set up fresh before each test, once before each test case, or before an entire test suite
+    <p>unittest provides fixture support via these methods:
+    <ul>
+        <li>setUp / tearDown - these are run before and after each test method
+        <li>setUpClass / tearDownClass - these are run before/after each TestCase
+        <li>setUpModule / tearDownModule - run before/after each TestSuite
+        <li>(new in Python 2.7) addCleanup / doCleanups - called after tearDown, in case a test throws an exception
+    </ul>
 
 </section>
 
@@ -224,9 +246,28 @@ Out[24]: True
     </code>
     </pre>
 
-    <p>assertAlmostEqual to the rescue!
-
 </section>
+
+<section class="slide">
+    <h2>assertAlmostEqual</h2>
+    <p>Verifies that two floating point values are close enough to each other.  Add a places keyword argument to specify the number of significant digits.
+<pre><code>
+import unittest
+
+class TestAlmostEqual(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_floating_point(self):
+        self.assertEqual(3*.15, .45)
+
+    def test_almost_equal(self):
+        self.assertAlmostEqual(3*.15, .45, places=7)
+
+</code></pre>
+</section>
+
 
 <section class="slide">
     <h2>Running your tests</h2>
@@ -235,20 +276,35 @@ Out[24]: True
 if __name__ == "__main__":
     unittest.main()
 </code></pre>
-    <p>That will get cumbersome with many TestCases, so organize the tests into a test suite</p>
+    <p>If it gets cumbersome with many TestCases, organize the tests into a test suite</p>
+</section>
+
+<section class="slide">
+    <h2>Test Suites</h2>
+    <p>Test suites group test cases into a single testable unit
+<pre><code>
+import unittest
+
+from calculator_test import TestCalculatorFunctions
+
+suite = unittest.TestLoader().loadTestsFromTestCase(TestCalculatorFunctions)
+
+unittest.TextTestRunner(verbosity=2).run(suite)
+</code></pre>
+
 </section>
 
 <section class="slide">
     <h2>nose</h2>
-    <p>extends unittest
-    <p>nose will find tests for you so you can focus on writing tests, not maintaining test suites
-    <p>any file matching the testMatch conditions will be searched for tests.  They can't be executable!
+    <p>A test runner which autodiscovers test cases 
+    <p>Nose will find tests for you so you can focus on writing tests, not maintaining test suites
+    <p>Any file matching the testMatch conditions will be searched for tests.  They can't be executable!
 
-<p>running your tests is as easy as
+<p>Running your tests is as easy as
 <pre><code>
 $ nosetests
 </code></pre>
-<p>Lots of plugins for nose, such as code coverage:
+<p>Many plugins exist for nose, such as code coverage:
 <pre><code>
 $ nosetests --with-coverage
 </code></pre>
@@ -265,7 +321,21 @@ $ nosetests --processes=5
 </section>
 
 <section class="slide">
+    <h2>Test Driven Development (TDD)</h2>
+    <p>In TDD, the tests are written the meet the requirements before the code exists.
+    <p>Once the collection of tests passes, the requirement is considered met.
+    <p>We don't always want to run the entire test suite.  In order to run a single test with nose:</p>
+    <p>
+    <pre><code>
+    nosetests calculator_test.py:TestCalculatorFunctions.test_add
+    </code></pre>
+    </p>
+</section>
+
+<section class="slide">
     <h2>Looking at a large test suite</h2>
+    <p>Django is a popular Python web framework, with an extensive test suite</p>
+    <p>Looking under the hood, it is a collection of short unit tests organized into unittest sites.</p>
 </section>
 
 <section class="slide">
@@ -310,7 +380,7 @@ $ epydoc example.py
     <h2>Exercises</h2>
     <ul>
         <li>Add unit tests for each method in calculator_functions.py
-        <li>Add setUp/tearDown methods and setUpClass/tearDownClass class methods.  Are they doing what you expect?
+        <li>Add fixtures via setUp/tearDown methods and setUpClass/tearDownClass class methods.  Are they behaving how you expect?
         <li>Add additional unit tests for floating point calculations
         <li>Fix any failures in the code
         <li>Add doctests to calculator_functions.py
