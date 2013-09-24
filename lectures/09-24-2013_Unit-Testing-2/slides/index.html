@@ -67,7 +67,7 @@ python -m SimpleHTTPServer
     <p>Creates isolated Python environments, containing only the packages you want independent of system-wide installation
     <p>Allows package installation without sysadmin privileges
     <p>Locks packages at a particular release, reducing dependency conflict 
-    <p>The 'environment' created is a python interpreter and user installed libraries in a directory, with the os PATH and Python sys.path set to reference that directory tree first.
+    <p>The 'environment' created is a python interpreter and user installed libraries in a directory, with the os PATH and Python sys.path referencing that directory tree before the usual system locations
 
     <p>Further reading</p>
     <ul>
@@ -82,7 +82,7 @@ python -m SimpleHTTPServer
     <p>To create a new environment and start using it:
 <pre><code>
 # Create the directory tree
-% virtualenv /path/to/your/environment
+% virtualenv --distribute /path/to/your/environment
 # Enter the virtualenv
 # on unix:
 % . /path/to/your/environment/bin/activate
@@ -98,7 +98,9 @@ python -m SimpleHTTPServer
 
 <section class="slide">
     <h2>Virtualenv Exercise</h2>
-    <p>Let's get a virtualenv running</p> 
+    <p class="slide">Initialize and enter a virtualenv</p> 
+    <p class="slide">Use pip to install nose</p>
+    <p class="slide">Verify in the Python shell that you are running the version of nose from your virtualenv (Hint: remember what happens when you append something with '?' in ipython?)</p>
     
 </section>
 
@@ -110,6 +112,11 @@ python -m SimpleHTTPServer
 <section class="slide">
     <h2>@decorators</h2>
     <p>Add functionality to a function.</p>
+<pre><code>
+@decorator
+def myfunction():
+    return
+</code></pre>
     <p>Support the <a target="_blank" href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented Programming (AOP)</a> paradigm by easing the separation of <i>cross-cutting concerns</i>
     <p>Some commonly used builtin decorators include:
         <ul>
@@ -249,7 +256,7 @@ def my_function2():
 </section>
 
 <section class="slide">
-    <h1>One more Python feature before getting back to testing.. the "with" statement</h1>
+    <h2>One more Python feature before getting back to testing.. the "with" statement</h2>
 </section>
 
 <section class="slide">
