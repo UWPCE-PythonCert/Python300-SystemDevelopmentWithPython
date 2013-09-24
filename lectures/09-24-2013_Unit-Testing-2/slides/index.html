@@ -78,7 +78,7 @@ python -m SimpleHTTPServer
 
 <section class="slide">
     <h2>Virtualenv</h2>
-    <p>A virtualenv is just a directory tree created in a particular way by the virtualenv tool
+    <p>A virtualenv is just a directory tree created by the virtualenv tool
     <p>To create a new environment and start using it:
 <pre><code>
 # Create the directory tree
@@ -97,7 +97,7 @@ python -m SimpleHTTPServer
 </section>
 
 <section class="slide">
-    <h2>Virtualenv</h2>
+    <h2>Virtualenv Exercise</h2>
     <p>Let's get a virtualenv running</p> 
     
 </section>
@@ -105,49 +105,76 @@ python -m SimpleHTTPServer
 
 <section class="slide">
     <h1>@decorators</h1>
-    <p>Support the <a target="_blank" href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented Programming (AOP)</a> paradigm
 </section>
 
 <section class="slide">
     <h2>@decorators</h2>
     <p>Add functionality to a function.</p>
-    <p>Some builtin decorators:
+    <p>Support the <a target="_blank" href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented Programming (AOP)</a> paradigm by easing the separation of <i>cross-cutting concerns</i>
+    <p>Some commonly used builtin decorators include:
+        <ul>
+            <li><a target="_blank" href="http://docs.python.org/2/library/functions.html#property">@property</a>
+            <li><a target="_blank" href="http://docs.python.org/2/library/functions.html#staticmethod">@staticmethod</a>
+            <li><a target="_blank" href="http://docs.python.org/2/library/functions.html#classmethod">@classmethod</a>
+        </ul>
+    <p class="slide">Let's see those in action</p>
+</section>
+
+<section class="slide">
+    <h2>@decorator example</h2>
+
 <pre><code>
 class MyClass(object):
+    _x = 5
+
     @property
-    def my_getter(self):
+    def x(self):
         return self._x
-        
+
     @staticmethod
-    def my_staticmethod():
-        return "foo"
+    def my_staticmethod(*args):
+        return "static method received %d arguments" % len(args)
 
     @classmethod
     def my_classmethod(cls):
         return "Called %s" % str(cls)
 
+class MySubClass(MyClass):
+    pass
+
+object1 = MyClass()
+object2 = MySubClass()
+
+print object1.x
+print object1.my_staticmethod()
+print object1.my_classmethod()
+
+print object2.x
+print object2.my_staticmethod()
+print object2.my_classmethod()
 </code></pre>
 </section>
 
 <section class="slide">
+    <h2>@decorators</h2>
 
-
-    <p>decorators are functions that take other functions as arguments in order to wrap them with common functionality.</p>
-    <p>Some common use cases:
+    <p>decorators are functions that take other functions as arguments and return wrapped functions in order to extract common functionality</p>
+    <p>A non-exhaustive list of common use cases:
     <ul>
         <li>Error handling
         <li>Authentication
         <li>Logging
         <li>Adding functionality to existing functions without subclassing
     </ul>
-<p>
-    python.org has a long list of user submitted decorators
-    <a target="_blank" href="https://wiki.python.org/moin/PythonDecoratorLibrary">https://wiki.python.org/moin/PythonDecoratorLibrary</a>
-</p>
+
+    <p>
+        python.org has a long list of user submitted decorators
+        <a target="_blank" href="https://wiki.python.org/moin/PythonDecoratorLibrary">https://wiki.python.org/moin/PythonDecoratorLibrary</a>
+    </p>
 </section>
 
 <section class="slide">
-    <h2>@decorators in action</h2>
+    <h2>@decorator anatomy</h2>
     <p>Decorators are possible because Python functions are first class objects</p>
     <p>Meaning they can be passed around, stored, and manipulated like any other object</p>
 
@@ -217,22 +244,133 @@ def my_function2():
 </section>
 
 <section class="slide">
-    <p>exercise with decorators</p>
+    <h2>@decorator exercise</h2>
+    <p class="slide">Create a @timer decorator that prints the time spent in the decorated function</p>
 </section>
 
 <section class="slide">
-    <p>now that we grok decorators let's hit mock</p>
-</section>
-<section class="slide">
-    <p>now that we grok decorators let's hit mock</p>
+    <h1>One more Python feature before getting back to testing.. the "with" statement</h1>
 </section>
 
+<section class="slide">
+    <h2>Context managers via the "with" statement</h2>
+    <p>Introduced in Python 2.5
+    <p>A context manager is just a class with __enter__ and __exit__ methods defined to handle setting up and tearing down the context</p>
+    <p>Provides generalizable execution contexts in which setup and teardown of context are executed no matter what happens</p>
+    <p>If you've been opening files using "with" (and you probably should!), you've been using context managers</p>
+<pre><code>
+with open("file.txt", "w") as f:
+    f.write("foo")
+</code></pre>
+</section>
 
 <section class="slide">
+    <h2>Writing a context manager</h2> 
+    <p>Define __enter__(self) and __exit__(self, type, value, traceback) on a class
+    <p>If __exit__ returns a true value, the exception is not re-raised
+    <p>An example may clarify:
+<pre><code>
+import os, random, shutil
 
+class TemporaryDirectory(object):
+    def __init__(self,directory):
+        self.base_directory = directory
+
+    def __enter__(self):
+        # set things up
+        self.directory = self.base_directory + str(random.random()) + "/"
+        os.makedirs(self.directory)
+        return self.directory
+
+    def __exit__(self, type, value, traceback):
+        # tear it down
+        shutil.rmtree(self.directory)
+
+with TemporaryDirectory("/tmp/foo") as dir:
+    # write some temp data into dir
+    with open(dir+"foo.txt", 'wb') as f:
+        import time
+        f.write("foo")
+        time.sleep(2)
+</code></pre>
     <p>
-        <a target="_blank" href=""></a>
+        <a target="_blank" href="http://www.python.org/dev/peps/pep-0343/">http://www.python.org/dev/peps/pep-0343/</a>
+</p>
+</section>
+
+<section class="slide">
+    <h2>Context Manager exercise</h2>
+    <p>Create a context manager which prints information on all exceptions which occur in the context and continues execution</p>
+<pre><code>
+with YourExceptionHandler() as handler:
+    print "do some stuff here"
+    1/0
+
+print "should still reach this point"
+
+</code></pre>
+<p class="slide">Why might using a context manager be better than implementing this with try..except..finally ?</p>
+<p class="slide">Also see the <a target="_blank" href="http://docs.python.org/2/library/contextlib.html">contextlib module</a></p>
+</section>
+
+<section class="slide">
+    <h2>Now we've got the tools to really test</h2>
+    <p>Consider the application in the examples/wikidef directory.  Give the command line utility a subject, and it will return a definition.</p>
+<pre><code>
+./define.py  Robots | html2text
+</code></pre>
+<p class="slide">How can we test our application code without abusing (and waiting for) Wikipedia?</p>
+</section>
+
+<section class="slide">
+    <h2>Using Mock objects to test an application with service dependencies</h2>
+    <p>With an understanding of decorators, we're ready to visit Mock objects</p>
+    <p>Mock objects replace real objects in your code at runtime during test</p>
+    <p>This allows you to test code which calls these objects without having their actual code run</p>
+    <p>Useful for testing objects which depend on expensive resources, or resources which are unavailable during test execution</p>
+    <p>
+        <a target="_blank" href="http://www.voidspace.org.uk/python/mock">http://www.voidspace.org.uk/python/mock</a></li>
     </p>
+</section>
+
+<section class="slide">
+    <h2>Mocks</h2>
+    <p>The MagickMock class will keep track of calls to it so we can verify that the class is being called correctly, without having to execute the code inside</p>
+    <p>Mocking can also let us test objects which haven't been created yet</p>
+</section>
+
+<section class="slide">
+    <h2>Easy mocking with mock.patch</h2>
+    <p>patch acts as a function decorator, class decorator or a context manager
+    <p> Inside the body of the function or with statement, the target is patched with a new object. When the function/with statement exits the patch is undone</p>
+    <p>Mock objects have their own asserts, see the API documentation for a listing:</p>
+    <p>
+        <a href="http://www.voidspace.org.uk/python/mock/mock.html">http://www.voidspace.org.uk/python/mock/mock.html</a>
+    </p>
+</section>
+
+<section class="slide">
+    <h2>Anatomy of a Mock</h2>
+<pre><code>
+# patch with a decorator
+@patch.object(Wikipedia, 'article')
+def test_article_success_decorator_mocked(self, mock_method):
+    article = Definitions.article("Robot")
+    mock_method.assert_called_once_with("Robot")
+
+# patch with a context manager
+def test_article_success_context_manager_mocked(self):
+    with patch.object(Wikipedia, 'article') as mock_method:
+        article = Definitions.article("Robot")
+        mock_method.assert_called_once_with("Robot")
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Exercises</h2>
+    <p class="slide">Decorate the Wikipedia.article method with @timer.  How long does it take?</p>
+    <p class="slide">Create a @logger decorator that logs the HTTP status from Wikipedia, add it to Wikipedia.article</p>
+    <p class="slide">Add a "level" keyword argument to the logger decorator, @logger(level="DEBUG").  If "level" == "DEBUG", print the raw HTTP response too.</p>
 </section>
 
 <section class="slide">
