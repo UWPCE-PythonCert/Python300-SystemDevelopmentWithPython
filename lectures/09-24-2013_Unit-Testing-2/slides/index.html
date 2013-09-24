@@ -404,8 +404,8 @@ def test_article_success_context_manager_mocked(self):
 <section class="slide">
     <h2>Exercises</h2>
     <p class="slide">Decorate the Wikipedia.article method with @timer.  How long does it take?</p>
-    <p class="slide">Create a @logger decorator that logs the HTTP status from Wikipedia, add it to Wikipedia.article</p>
-    <p class="slide">Add a "level" keyword argument to the logger decorator, @logger(level="DEBUG").  If "level" == "DEBUG", print the raw HTTP response too.</p>
+    <p class="slide">Create a @logger decorator that logs the time called, function arguments, and function return value. Add it to Wikipedia.article</p>
+    <p class="slide">Add a "level" keyword argument to the logger decorator, @logger(level="DEBUG").  Add **kwargs to Wikipedia.article.  If kwargs["level"] == "DEBUG", print the raw HTTP response too.</p>
 </section>
 
 <section class="slide">

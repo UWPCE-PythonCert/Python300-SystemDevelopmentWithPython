@@ -22,6 +22,11 @@ class WikiDefTest(unittest.TestCase):
         self.assertRaises(ParseError, Definitions.article, missing_article_title)
 
     # patch with a decorator
+    @patch('definitions.Wikipedia.article')
+    def test_article_success_decorator_mocked(self, mock_method):
+        article = Definitions.article("Robot")        
+        mock_method.assert_called_once_with("Robot")
+
     @patch.object(Wikipedia, 'article')
     def test_article_success_decorator_mocked(self, mock_method):
         article = Definitions.article("Robot")        
