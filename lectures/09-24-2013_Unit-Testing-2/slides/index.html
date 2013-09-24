@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+	<title>Isilon System Development with Python, Week 2</title>
+	
+	<!-- Required stylesheet -->
+	<link rel="stylesheet" href="core/deck.core.css">
+	
+	<!-- Extension CSS files go here. Remove or add as needed. -->
+	<link rel="stylesheet" href="extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="extensions/status/deck.status.css">
+	<link rel="stylesheet" href="extensions/hash/deck.hash.css">
+	<link rel="stylesheet" href="extensions/scale/deck.scale.css">
+
+	<!-- Style theme. More available in /themes/style/ or create your own. -->
+    <!-- default
+	<link rel="stylesheet" href="themes/style/neon.css">
+    -->
+	<link rel="stylesheet" href="themes/style/web-2.0.css">
+
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+    <!--
+	<link rel="stylesheet" href="themes/transition/fade.css">
+    -->
+	<link rel="stylesheet" href="themes/transition/horizontal-slide.css">
+	
+	<!-- Required Modernizr file -->
+	<script src="modernizr.custom.js"></script>
+</head>
+<body class="deck-container">
+
+
+<section class="slide">
+	<h2>System Development with Python</h2>
+    <h3>Week 2, Testing Part 2</h3>
+    <p>September 24, 2013</p>
+    <p>Joseph Sheedy</p>
+    <p><i>joseph.sheedy@gmail.com</i></p>
+    <p>Git repository:  <a href="https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython" target="_blank">https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython</a></p>
+</section>
+
+<section class="slide">
+    <h2>System Development with Python</h2>
+        <p>To view the slides, you can either browse to the location of your git checkout, or serve it with the Python webserver:
+<pre>
+<code>
+python -m SimpleHTTPServer
+</code>
+</pre>
+        
+</section>
+
+<section class="slide">
+    <h2>Virtualenv</h2>
+    <p>A tool to create isolated Python environments</p> 
+</section>
+
+<section class="slide">
+    <h2>Virtualenv</h2>
+    <p>Creates isolated Python environments, containing only the packages you want independent of system-wide installation
+    <p>Allows package installation without sysadmin privileges
+    <p>Locks packages at a particular release, reducing dependency conflict 
+    <p>The 'environment' created is a python interpreter and user installed libraries in a directory, with the os PATH and Python sys.path set to reference that directory tree first.
+
+    <p>Further reading</p>
+    <ul>
+        <li><a target="_blank" href="http://www.virtualenv.org/en/latest/#what-it-does">http://www.virtualenv.org/en/latest/#what-it-does</a>
+        <li><a target="_blank" href="https://pypi.python.org/pypi/virtualenv">https://pypi.python.org/pypi/virtualenv</a>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Virtualenv</h2>
+    <p>A virtualenv is just a directory tree created in a particular way by the virtualenv tool
+    <p>To create a new environment and start using it:
+<pre><code>
+# Create the directory tree
+% virtualenv /path/to/your/environment
+# Enter the virtualenv
+# on unix:
+% . /path/to/your/environment/bin/activate
+# Windows:
+% \path\to\env\Scripts\activate
+
+% pip install [packages you need]
+# To exit the virtualenv, either simply exit the shell or 
+% deactivate
+</code></pre>
+
+</section>
+
+<section class="slide">
+    <h2>Virtualenv</h2>
+    <p>Let's get a virtualenv running</p> 
+    
+</section>
+
+
+<section class="slide">
+    <h1>@decorators</h1>
+    <p>Support the <a target="_blank" href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented Programming (AOP)</a> paradigm
+</section>
+
+<section class="slide">
+    <h2>@decorators</h2>
+    <p>Add functionality to a function.</p>
+    <p>Some builtin decorators:
+<pre><code>
+class MyClass(object):
+    @property
+    def my_getter(self):
+        return self._x
+        
+    @staticmethod
+    def my_staticmethod():
+        return "foo"
+
+    @classmethod
+    def my_classmethod(cls):
+        return "Called %s" % str(cls)
+
+</code></pre>
+</section>
+
+<section class="slide">
+
+
+    <p>decorators are functions that take other functions as arguments in order to wrap them with common functionality.</p>
+    <p>Some common use cases:
+    <ul>
+        <li>Error handling
+        <li>Authentication
+        <li>Logging
+        <li>Adding functionality to existing functions without subclassing
+    </ul>
+<p>
+    python.org has a long list of user submitted decorators
+    <a target="_blank" href="https://wiki.python.org/moin/PythonDecoratorLibrary">https://wiki.python.org/moin/PythonDecoratorLibrary</a>
+</p>
+</section>
+
+<section class="slide">
+    <h2>@decorators in action</h2>
+    <p>Decorators are possible because Python functions are first class objects</p>
+    <p>Meaning they can be passed around, stored, and manipulated like any other object</p>
+
+    <p>Anatomy of a decorator:
+    <pre>
+    <code>
+def shiny_decorator(func):
+    def _shiny_decorator(*args, **kwargs):
+        print "do stuff here"
+        func(*args, **kwargs)
+        print "and here"
+    return _shiny_decorator
+
+@shiny_decorator
+def my_function():
+    print "function payload here"
+
+# this is equivalent to
+def my_function():
+    print "function payload here"
+function = shiny_decorator(my_function)
+    </code>
+    </pre>
+    </p>
+    <p>Further reading</p>
+    <ul>
+        <li><a target="_blank" href="http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/">http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/</a></li>
+        <li><a target="_blank" href="http://www.thumbtack.com/engineering/a-primer-on-python-decorators/">http://www.thumbtack.com/engineering/a-primer-on-python-decorators/</a></li>
+        <li><a target="_blank" href="http://www.ibm.com/developerworks/linux/library/l-cpdecor/index.html">http://www.ibm.com/developerworks/linux/library/l-cpdecor/index.html</a></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>@decorator arguments</h2>
+    <p>decorators can take arguments, with a little care</p>
+    <p>the <a target="_blank" href="http://docs.python.org/2/whatsnew/2.4.html">official introduction</a> to the feature said "getting this right can be slightly brain bending"</p>
+<pre>
+# functional equivalent without arguments:
+function = decorator(function)
+
+# With arguments:
+function = decorator(argument="Argument")(function)
+</pre>
+<pre><code>
+def shiny_decorator(func=None, **options):
+    if func != None:
+        # We received the function on this call, so we can define
+        # and return the inner function
+        log_level = options.get('log_level', 'INFO')
+        def inner(*args, **kwargs):
+            print "logging at level %s" % log_level
+            func(*args, **kwargs)
+        return inner
+    else:
+        def inner(func):
+            return shiny_decorator(func, **options)
+        return inner
+
+@shiny_decorator()
+def my_function():
+    print "function payload here"
+
+@shiny_decorator(log_level="DEBUG")
+def my_function2():
+    print "function2 payload here"
+</code></pre>
+</section>
+
+<section class="slide">
+    <p>exercise with decorators</p>
+</section>
+
+<section class="slide">
+    <p>now that we grok decorators let's hit mock</p>
+</section>
+<section class="slide">
+    <p>now that we grok decorators let's hit mock</p>
+</section>
+
+
+<section class="slide">
+
+    <p>
+        <a target="_blank" href=""></a>
+    </p>
+</section>
+
+<section class="slide">
+    <h1>Questions?</h1>
+</section>
+
+<!-- End slides. -->
+
+
+<!-- Begin extension snippets. Add or remove as needed. -->
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+<!-- End extension snippets. -->
+
+
+<!-- Required JS files. -->
+<script src="jquery-1.7.2.min.js"></script>
+<script src="core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="core/deck.core.js"></script>
+<script src="extensions/hash/deck.hash.js"></script>
+<script src="extensions/menu/deck.menu.js"></script>
+<script src="extensions/goto/deck.goto.js"></script>
+<script src="extensions/status/deck.status.js"></script>
+<script src="extensions/navigation/deck.navigation.js"></script>
+<script src="extensions/scale/deck.scale.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+	$(function() {
+		$.deck('.slide');
+	});
+</script>
+</body>
+</html>
