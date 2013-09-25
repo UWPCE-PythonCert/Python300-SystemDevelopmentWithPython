@@ -2,9 +2,9 @@
 
 import sys
 
-from api import Wikipedia
+from definitions import Definitions
 
 title = sys.argv[1]
 
-print Wikipedia.article(title).encode('utf-8')
+print Definitions.article(title).encode('utf-8')
 
