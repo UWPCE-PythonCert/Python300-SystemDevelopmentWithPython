@@ -58,6 +58,15 @@ python -m SimpleHTTPServer
 </section>
 
 <section class="slide">
+    <h2>Class 2 topics</h2>
+    <ul>
+        <li>Virtualenv
+        <li>@decorators
+        <li>context managers (aka using the "with" statement)
+        <li>Mock objects
+    </ul>
+</section>
+<section class="slide">
     <h2>Virtualenv</h2>
     <p>A tool to create isolated Python environments</p> 
 </section>
@@ -111,12 +120,12 @@ python -m SimpleHTTPServer
 
 <section class="slide">
     <h2>@decorators</h2>
-    <p>Add functionality to a function.</p>
 <pre><code>
 @decorator
 def myfunction():
     return
 </code></pre>
+    <p>Wrap functionality around a function.</p>
     <p>Support the <a target="_blank" href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented Programming (AOP)</a> paradigm by easing the separation of <i>cross-cutting concerns</i>
     <p>Some commonly used builtin decorators include:
         <ul>
@@ -253,6 +262,7 @@ def my_function2():
 <section class="slide">
     <h2>@decorator exercise</h2>
     <p class="slide">Create a @timer decorator that prints the time spent in the decorated function</p>
+    <p class="slide">Create a function that takes some time to complete, for instance with a call to time.sleep. Verify your @timer on it.</p>
 </section>
 
 <section class="slide">
@@ -264,7 +274,8 @@ def my_function2():
     <p>Introduced in Python 2.5
     <p>A context manager is just a class with __enter__ and __exit__ methods defined to handle setting up and tearing down the context</p>
     <p>Provides generalizable execution contexts in which setup and teardown of context are executed no matter what happens</p>
-    <p>If you've been opening files using "with" (and you probably should!), you've been using context managers</p>
+    <p>This allows us to separate out exception handling code</p>
+    <p>If you've been opening files using "with" (and you probably should be), you have been using context managers</p>
 <pre><code>
 with open("file.txt", "w") as f:
     f.write("foo")
@@ -274,10 +285,12 @@ with open("file.txt", "w") as f:
 <section class="slide">
     <h2>Writing a context manager</h2> 
     <p>Define __enter__(self) and __exit__(self, type, value, traceback) on a class
-    <p>If __exit__ returns a true value, the exception is not re-raised
+    <p>If __exit__ returns a true value, a caught exception is not re-raised
     <p>An example may clarify:
 <pre><code>
+"""A context manager for creating a temporary directory which gets destroyed on context exit"""
 import os, random, shutil
+
 
 class TemporaryDirectory(object):
     def __init__(self,directory):
@@ -324,7 +337,7 @@ print "should still reach this point"
     <h2>Now we've got the tools to really test</h2>
     <p>Consider the application in the examples/wikidef directory.  Give the command line utility a subject, and it will return a definition.</p>
 <pre><code>
-./define.py  Robots | html2text
+./define.py  Robot | html2text
 </code></pre>
 <p class="slide">How can we test our application code without abusing (and waiting for) Wikipedia?</p>
 </section>
@@ -342,14 +355,21 @@ print "should still reach this point"
 
 <section class="slide">
     <h2>Mocks</h2>
-    <p>The MagickMock class will keep track of calls to it so we can verify that the class is being called correctly, without having to execute the code inside</p>
-    <p>Mocking can also let us test objects which haven't been created yet</p>
-</section>
+    <p>The MagickMock class will keep track of calls to it so we can verify that the class is being called correctly, without having to execute the code underneath</p>
+<pre><code>
+# need a "fake" object for testing?   Try a MagicMock
 
-<section class="slide">
-    <h2>Easy mocking with mock.patch</h2>
-    <p>patch acts as a function decorator, class decorator or a context manager
-    <p> Inside the body of the function or with statement, the target is patched with a new object. When the function/with statement exits the patch is undone</p>
+import mock
+
+mock_object = mock.MagicMock()
+
+mock_object.foo.call_count
+
+mock_object.foo()
+
+mock_object.foo.call_count
+
+</code></pre>
     <p>Mock objects have their own asserts, see the API documentation for a listing:</p>
     <p>
         <a href="http://www.voidspace.org.uk/python/mock/mock.html">http://www.voidspace.org.uk/python/mock/mock.html</a>
@@ -357,7 +377,13 @@ print "should still reach this point"
 </section>
 
 <section class="slide">
-    <h2>Anatomy of a Mock</h2>
+    <h2>Easy mocking with mock.patch</h2>
+    <p>patch acts as a function decorator, class decorator, or a context manager
+    <p> Inside the body of the function or with statement, the target is patched with a new object. When the function/with statement exits the patch is undone</p>
+</section>
+
+<section class="slide">
+    <h2>Using patch</h2>
 <pre><code>
 # patch with a decorator
 @patch.object(Wikipedia, 'article')
@@ -371,13 +397,15 @@ def test_article_success_context_manager_mocked(self):
         article = Definitions.article("Robot")
         mock_method.assert_called_once_with("Robot")
 </code></pre>
+<p>
+        <a target="_blank" href="http://www.voidspace.org.uk/python/mock/patch.html">http://www.voidspace.org.uk/python/mock/patch.html</a>
 </section>
 
 <section class="slide">
     <h2>Exercises</h2>
     <p class="slide">Decorate the Wikipedia.article method with @timer.  How long does it take?</p>
-    <p class="slide">Create a @logger decorator that logs the HTTP status from Wikipedia, add it to Wikipedia.article</p>
-    <p class="slide">Add a "level" keyword argument to the logger decorator, @logger(level="DEBUG").  If "level" == "DEBUG", print the raw HTTP response too.</p>
+    <p class="slide">Create a @logger decorator that logs the time called, function arguments, and function return value. Add it to Wikipedia.article</p>
+    <p class="slide">Add a "level" keyword argument to the logger decorator, @logger(level="DEBUG").  Add **kwargs to Wikipedia.article.  If kwargs["level"] == "DEBUG", print the raw HTTP response too.</p>
 </section>
 
 <section class="slide">
