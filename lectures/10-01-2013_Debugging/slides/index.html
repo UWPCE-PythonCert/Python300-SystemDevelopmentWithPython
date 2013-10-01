@@ -60,54 +60,12 @@ python -m SimpleHTTPServer
 <section class="slide">
     <h2>Today's topics</h2>
     <ul>
-        <li>Iterators
         <li>Exceptions
+        <li>Iterators
         <li>Debugging
     </ul>
 </section>
 
-<section class="slide">
-    <h2>Iterators</h2>
-    <p>Iterators are objects which support a concept of iteration over a collection
-<pre><code>
-for x in foo():
-    print x
-</code></pre>
-    <p class="slide">An iterator is an object which follows the Python iterator protocol
-    <p class="slide">An iterator defines two required methods in order to iterate
-    <ul class="slide">
-        <li>__iter__() returns the iterator itself
-        <li>next() returns the next item in the sequence
-    </ul>
-    <p class="slide">
-        <a href="http://docs.python.org/2/library/stdtypes.html#iterator-types">http://docs.python.org/2/library/stdtypes.html#iterator-types</a>
-    </p>
-
-</section>
-
-<section class="slide">
-    <h2>Demonstration iterator</h2>
-<pre><code>
-class CountToTen(object):
-    data = range(10)
-    i = -1
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        self.i += 1
-        if self.i >= len(self.data):
-            raise StopIteration
-        else:
-            return self.data[self.i]
-</code></pre>
-</p>
-</section>
-
-<section class="slide">
-    <h1>Review of Exceptions</h1>
-</section>
 
 <section class="slide">
     <h2>Exceptions</h2>
@@ -118,8 +76,13 @@ class CountToTen(object):
         <p>When either the interpreter or your own code detects an error condition, an exception may be raised</p>
 
         <p>The exception will bubble up the call stack until it is handled.  If it's not, the interpreter will exit.
-
-        <p></p> 
+        <p>At each level in the stack, a handler can either:
+            <ul>
+                <li>let it pass through (the default)
+                <li>swallow the exception
+                <li>catch the exception and raise it again
+                <li>catch the exception and raise a new one
+            </ul>
     </div>
 
 </section>
@@ -202,6 +165,7 @@ inheritance hierarchy.
     <p>i.e. StopIteration for iterators</p>
 </section>
 
+<!--
 <section class="slide">
 <h2>FibIterator, demonstrating StopIteration</h2>
 <pre><code>
@@ -227,6 +191,63 @@ for x in iter:
     print x
 </code></pre>
 </section>
+-->
+
+
+<section class="slide">
+    <h2>Iterators</h2>
+    <p>Iterators are objects which support a concept of iteration over a collection
+<pre><code>
+# looping over the lines in a file is done via an iterator:
+f = open("file.dat")
+for line in f:
+    print line
+
+# and you can create your own
+for x in foo():
+    print x
+</code></pre>
+    <p class="slide">An iterator is an object which follows the Python iterator protocol
+    <p class="slide">An iterator defines two required methods in order to iterate
+    <ul class="slide">
+        <li>__iter__() returns the iterator itself
+        <li>next() returns the next item in the sequence
+    </ul>
+    <p class="slide">
+        <a href="http://docs.python.org/2/library/stdtypes.html#iterator-types">http://docs.python.org/2/library/stdtypes.html#iterator-types</a>
+    </p>
+
+</section>
+
+<section class="slide">
+    <h2>Demonstration iterator</h2>
+<pre><code>
+class CountToTen(object):
+    data = range(10)
+    i = -1
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        self.i += 1
+        if self.i >= len(self.data):
+            raise StopIteration
+        else:
+            return self.data[self.i]
+</code></pre>
+</p>
+</section>
+
+<section class="slide">
+    <h2>Now let's build an iterator</h2>
+    <p>Calculate the first 20 values in the Fibonacci sequence: [0, 1, 1, 2, 3, 5, ... ] using an iterator like this:
+<pre><code>
+for x in FibonacciIterator(20):
+    print x
+</code></pre>
+    <p>Call out the final value in the sequence when you've calculated a solution!</p>
+</section>
 
 <section class="slide">
 <h2>Sometimes there is an easier way</h2>
@@ -235,7 +256,7 @@ def count_to_10():
     for i in range(10):
         yield i
 </code></pre>
-<p>(3500 upvotes on this one, probably it was a great answer and yield is confusing at first)</p>
+<p>(3500 upvotes on this one, yield is confusing at first)</p>
 <a target="_blank" href="http://stackoverflow.com/questions/231767/the-python-yield-keyword-explained">http://stackoverflow.com/questions/231767/the-python-yield-keyword-explained</a>
 </section>
 
@@ -284,26 +305,23 @@ count_to_10 = lambda: (i for i in range(10))
 </section>
 
 <section class="slide">
-    <h2>Invoking pdb</h2>
+    <h2><a target="_blank" href="http://docs.python.org/2/library/pdb.html">Pdb - The Python Debugger</a></h2>
+    <p>Comes with the standard library</p>
+    <p>Invoking pdb</p>
     <ul>
-        <li>Script mode
         <li>Postmortem mode
         <li>Run mode
+        <li>Script mode
         <li>Trace mode
     </ul>
 </section>
 
-<section class="slide">
-    <h2>Script mode</h2>
-<pre><code>
-python -m pdb script.py
-</pre></code>
-</section>
 
 <section class="slide">
     <h2>Postmortem mode</h2>
 <pre><code>
 python -i script.py
+import pdb; pdb.pm()
 </pre></code>
 </section>
 
@@ -311,8 +329,13 @@ python -i script.py
     <h2>Run mode</h2>
 <pre><code>
 pdb.run('some.expression()')
+</pre></code>
+</section>
 
-import divide, pdb; pdb.pm('divide.divide(0)')
+<section class="slide">
+<h2>Script mode</h2>
+<pre><code>
+python -m pdb script.py
 </pre></code>
 </section>
 
@@ -419,6 +442,13 @@ import rpdb2; rpdb2.start_embedded_debugger("password")
 <p>
     <a target="_blank" href="http://winpdb.org/tutorial/WinpdbTutorial.html">http://winpdb.org/tutorial/WinpdbTutorial.html</a>
 </p>
+</section>
+
+<section class="slide">
+    <h2>Debugging exercise</h2>
+    <p>Find the wikidef app in the examples folder</p> 
+    <p>Using one of the debugging tools, debug the app and find the server type that wikipedia is using</p>
+    <p>What's the result?    response.headers.get('server')</p>
 </section>
 
 <section class="slide">
