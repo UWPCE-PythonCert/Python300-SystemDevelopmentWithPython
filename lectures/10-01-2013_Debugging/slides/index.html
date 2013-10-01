@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=1024, user-scalable=no">
 
-	<title>Isilon System Development with Python, Week 2</title>
+	<title>Isilon System Development with Python, Week 3</title>
 	
 	<!-- Required stylesheet -->
 	<link rel="stylesheet" href="core/deck.core.css">
@@ -40,7 +40,7 @@
 <section class="slide">
 	<h2>System Development with Python</h2>
     <h3>Week 3, Debugging</h3>
-    <p>December 01, 2013</p>
+    <p>October 01, 2013</p>
     <p>Joseph Sheedy</p>
     <p><i>joseph.sheedy@gmail.com</i></p>
     <p>Git repository:  <a href="https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython" target="_blank">https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython</a></p>
@@ -57,18 +57,368 @@ python -m SimpleHTTPServer
         
 </section>
 
-
 <section class="slide">
-    <h2></h2>
-    <p></p> 
+    <h2>Today's topics</h2>
+    <ul>
+        <li>Iterators
+        <li>Exceptions
+        <li>Debugging
+    </ul>
 </section>
 
 <section class="slide">
-    <p>Further reading</p>
-    <ul>
-        <li><a target="_blank" href="http://www.virtualenv.org/en/latest/#what-it-does">http://www.virtualenv.org/en/latest/#what-it-does</a>
-        <li><a target="_blank" href="https://pypi.python.org/pypi/virtualenv">https://pypi.python.org/pypi/virtualenv</a>
+    <h2>Iterators</h2>
+    <p>Iterators are objects which support a concept of iteration over a collection
+<pre><code>
+for x in foo():
+    print x
+</code></pre>
+    <p class="slide">An iterator is an object which follows the Python iterator protocol
+    <p class="slide">An iterator defines two required methods in order to iterate
+    <ul class="slide">
+        <li>__iter__() returns the iterator itself
+        <li>next() returns the next item in the sequence
     </ul>
+    <p class="slide">
+        <a href="http://docs.python.org/2/library/stdtypes.html#iterator-types">http://docs.python.org/2/library/stdtypes.html#iterator-types</a>
+    </p>
+
+</section>
+
+<section class="slide">
+    <h2>Demonstration iterator</h2>
+<pre><code>
+class CountToTen(object):
+    data = range(10)
+    i = -1
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        self.i += 1
+        if self.i >= len(self.data):
+            raise StopIteration
+        else:
+            return self.data[self.i]
+</code></pre>
+</p>
+</section>
+
+<section class="slide">
+    <h1>Review of Exceptions</h1>
+</section>
+
+<section class="slide">
+    <h2>Exceptions</h2>
+    <h3 class="slide">It's easier to ask for forgiveness than permission</h3>
+
+    <div class="slide">
+
+        <p>When either the interpreter or your own code detects an error condition, an exception may be raised</p>
+
+        <p>The exception will bubble up the call stack until it is handled.  If it's not, the interpreter will exit.
+
+        <p></p> 
+    </div>
+
+</section>
+
+<section class="slide">
+    <h2>Handling exceptions</h2>
+    <p>The most basic form uses the built-ins try and except
+<pre><code>
+try:
+    print "do some stuff"
+    1 / 0
+    print "do some more stuff"
+except:
+    print "stuff failed"
+
+</code></pre>
+</section>
+
+<section class="slide">
+<h2>A few more builtins for exception handling: finally, else, and raise</h2>
+<pre><code>
+def divide(x, y):
+
+    try:
+        print "line 1"
+        result = x / y
+        print "line 2"
+
+    except ZeroDivisionError as e:
+        print "caught division error: %s" % str(e)
+
+    except Exception as e:
+        print "unhandled exception %s.  message: %s " % (type(e), e.args)
+        raise
+
+    else:
+        print "everything worked great"
+        return result
+
+    finally:
+        print "this is executed no matter what"
+
+</code></pre>
+</section>
+
+<section class="slide">
+<h2> Built-in exceptions</h2>
+<pre><code>
+[name for name in dir(__builtin__) if "Error" in name]
+</code></pre>
+<p>If one of these meets your needs, by all means use it.  Else, define a new exception type by sublcassing one, perhaps Exception </p>
+<pre><code>
+In [32]: import exceptions
+In [33]: exceptions?
+Type:       module
+String Form:<module 'exceptions' (built-in)>
+Docstring:
+Python's standard exception class hierarchy.
+
+Exceptions found here are defined both in the exceptions module and the
+built-in namespace.  It is recommended that user-defined exceptions
+inherit from Exception.  See the documentation for the exception
+inheritance hierarchy.
+</code></pre>
+
+</section>
+
+
+<section class="slide">
+    <h2>Further reading </h2>
+<ul>
+    <li><a target="_blank" href="https://wiki.python.org/moin/HandlingExceptions">https://wiki.python.org/moin/HandlingExceptions</a>
+    <li><a target="_blank" href="http://docs.python.org/2/library/exceptions.html">http://docs.python.org/2/library/exceptions.html</a>
+    <li><a target="_blank" href="http://docs.python.org/2/tutorial/errors.html">http://docs.python.org/2/tutorial/errors.html</a>
+</ul>
+</section>
+<section class="slide">
+    <h2>Exceptions aren't just for errors</h2>
+    <p>Exception handling can be used for control flow as well
+    <p>i.e. StopIteration for iterators</p>
+</section>
+
+<section class="slide">
+<h2>FibIterator, demonstrating StopIteration</h2>
+<pre><code>
+class FibIterator(object):
+
+    def __init__(self):
+        self.data = [0,1,1,2,3,5,8,13,21]
+        self.i = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self.i >= len(self.data):
+            raise StopIteration
+
+        value = self.data[self.i]
+        self.i += 1
+        return value
+
+iter = FibIterator()
+for x in iter:
+    print x
+</code></pre>
+</section>
+
+<section class="slide">
+<h2>Sometimes there is an easier way</h2>
+<pre><code>
+def count_to_10():
+    for i in range(10):
+        yield i
+</code></pre>
+<p>(3500 upvotes on this one, probably it was a great answer and yield is confusing at first)</p>
+<a target="_blank" href="http://stackoverflow.com/questions/231767/the-python-yield-keyword-explained">http://stackoverflow.com/questions/231767/the-python-yield-keyword-explained</a>
+</section>
+
+<section class="slide">
+<h2>Sometimes there is an easier easier way, with generators</h2>
+<pre><code>
+count_to_10 = lambda: (i for i in range(10))
+</code></pre>
+<a target="_blank" href="https://wiki.python.org/moin/Generators">https://wiki.python.org/moin/Generators</a>
+</section>
+
+<section class="slide">
+    <h2>Debugging Python</h2>
+    <p class="slide">Debuggers are code which allows the inspection of state of other code during runtime.</p>
+
+<div class="slide">
+    <p>Rudimentary tools
+        <ul>
+            <li>print()</li>
+            <li>interpreter hints</li>
+            <li>import logging.debug</li>
+            <li>assert()</li>
+        </ul>
+    </p>
+
+    <p >Console debuggers</p>
+        <ul>
+            <li>pdb/ipdb</li>
+        </ul>
+    </p>
+
+    <p >GUI debuggers</p>
+        <ul>
+            <li>Winpdb</li>
+            <li>Eclipse</li>
+            <li>Visual Studio</li>
+        </ul>
+    </p>
+</div>
+</section>
+
+<section class="slide">
+    <h2>help from the interpreter</h2>
+    <p>investigate import issues with -v</p>
+    <p>inspect environment after running script with -i</p>
+</section>
+
+<section class="slide">
+    <h2>Invoking pdb</h2>
+    <ul>
+        <li>Script mode
+        <li>Postmortem mode
+        <li>Run mode
+        <li>Trace mode
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Script mode</h2>
+<pre><code>
+python -m pdb script.py
+</pre></code>
+</section>
+
+<section class="slide">
+    <h2>Postmortem mode</h2>
+<pre><code>
+python -i script.py
+</pre></code>
+</section>
+
+<section class="slide">
+    <h2>Run mode</h2>
+<pre><code>
+pdb.run('some.expression()')
+
+import divide, pdb; pdb.pm('divide.divide(0)')
+</pre></code>
+</section>
+
+<section class="slide">
+    <h2>Trace mode</h2>
+<pre><code>
+import pdb; pdb.set_trace()
+</pre></code>
+</section>
+
+<section class="slide">
+    <h2>Navigating pdb</h2>
+    <p>Now we're at the pdb prompt</p>
+    <p>pdb survival guide</p>
+<pre>
+<code>
+% python -m pdb my_sweet_app.py
+pdb&gt; break my_sweet_app.py:4
+pdb&gt; break 1
+pdb&gt; clear 1
+pdb&gt; break # list breakpoints
+pdb&gt; list
+pdb&gt; return # execute until function returns
+pdb&gt; step
+pdb&gt; down # one level down the stack
+pdb&gt; up # one level up
+pdb&gt; where # print stack trace, aliased to bt
+pdb&gt; until # Continue execution until the line with a number greater than the current one is reached or until the current frame returns.
+pdb&gt; continue
+
+</code>
+</pre>
+</section>
+
+<section class="slide">
+    <h2>Conditional Breakpoints</h2>
+<pre><code>
+pdb&gt; help condition
+condition bpnumber str_condition
+str_condition is a string specifying an expression which
+must evaluate to true before the breakpoint is honored.
+If str_condition is absent, any existing condition is removed;
+i.e., the breakpoint is made unconditional.
+</code></pre>
+
+<p>Set conditions</p>
+<pre><code>
+condition 1 x==1
+</code></pre>
+
+<p>Clear conditions</p>
+<pre><code>
+condition 1
+</code></pre>
+
+</section>
+
+<section class="slide">
+    <h2>pdb in ipython</h2>
+<pre>
+<code>
+In [2]: pdb
+Automatic pdb calling has been turned ON
+
+%run app.py
+
+# now halts execution on uncaught exception
+
+</code>
+</pre>
+<p>
+If you forget to turn on pdb, the magic command %debug will activate the debugger (in 'post-mortem mode').
+</p>
+</section>
+
+<section class="slide">
+    <h2>Eclipse</h2>
+    <p>A multi-language IDE</p>
+    <p>Python support via <a target="_blank" href="http://pydev.org/">http://pydev.org/</a>
+    <p>Supports a lot of debugging features like conditional breakpoints, provided you look in the right places!</p>
+<p>Further reading</p>
+    <a target="_blank" href="http://pydev.org/manual_adv_debugger.html">http://pydev.org/manual_adv_debugger.html</a>
+</section>
+
+<section class="slide">
+    <h2>winpdb</h2>
+    <p>A multi platform Python debugger with threading support</p> 
+    <p>Easier to start up and get debugging</p>
+<pre>
+<code>
+winpdb your_app.py
+</code>
+</pre>
+</section>
+
+<section class="slide">
+    <h2>Remote debugging with winpdb</h2>
+    <p>To debug an application running a different Python, even remotely:</p>
+<pre>
+<code>
+import rpdb2; rpdb2.start_embedded_debugger("password")
+</code>
+</pre>
+<p>
+    <a target="_blank" href="http://winpdb.org/tutorial/WinpdbTutorial.html">http://winpdb.org/tutorial/WinpdbTutorial.html</a>
+</p>
 </section>
 
 <section class="slide">
