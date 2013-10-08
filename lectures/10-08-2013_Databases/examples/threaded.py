@@ -63,7 +63,7 @@ def populate_db(conn):
 
 def writer():
     logging.debug("connecting")
-    with sqlite3.connect(DB_FILENAME, isolation_level="DEFERRED") as conn:
+    with sqlite3.connect(DB_FILENAME, isolation_level="EXCLUSIVE") as conn:
         populate_db(conn)
         logging.debug("waiting to sync")
         ready.wait()
@@ -75,7 +75,7 @@ def writer():
 
 
 def reader():
-    with sqlite3.connect(DB_FILENAME, isolation_level="DEFERRED") as conn:
+    with sqlite3.connect(DB_FILENAME, isolation_level="EXCLUSIVE") as conn:
         logging.debug("waiting to sync")
         ready.wait()
         logging.debug("beginning read")

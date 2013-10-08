@@ -35,35 +35,10 @@ def show_books(conn):
     query = book_query
     show_query_results(conn, query)
 
-def populate_db(conn):
-    authors = ([author] for author in AUTHORS_BOOKS.keys())
-    cur = conn.cursor()
-    cur.executemany(author_insert, authors)
-
-    for author in AUTHORS_BOOKS.keys():
-        param = ([book, author] for book in AUTHORS_BOOKS[author])
-        cur.executemany(book_insert, param)
 
 if __name__ == '__main__':
     if DB_IS_NEW:
         print "Database does not yet exist, please import `createdb` first"
         sys.exit(1)
     
-
-    with sqlite3.connect(DB_FILENAME, isolation_level=None) as conn1, \
-        sqlite3.connect(DB_FILENAME, isolation_level=None) as conn2:
-        try:
-            populate_db(conn1)
-
-            show_authors(conn2)
-            show_books(conn2)
-        except Exception:
-            conn1.rollback()
-            show_authors(conn2)
-            show_books(conn2)
-            raise
-        else:
-            conn1.commit()
-            show_authors(conn2)
-            show_books(conn2)
- 
+    print "Do something cool here"
