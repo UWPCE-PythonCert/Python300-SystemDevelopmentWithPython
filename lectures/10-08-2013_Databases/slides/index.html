@@ -1052,16 +1052,13 @@ def main():
 </section>
 <section class="slide">
 <h2>Verify Your Work</h2>
-
 <p>
 Quit your python interpreter and delete the file books.db that should be
 in the examples folder
-
 <p>
     Then run the script from the command line to try it out:
 
 <pre><code>
-
 $ python createdb.py
 Creating schema
 $ python createdb.py
@@ -1076,13 +1073,11 @@ Database exists, assume schema does, too.
 Add the following to createdb.py:
 
 <pre><code>
-
 # in the imports, add this line:
 from utils import show_table_metadata
 </code></pre>
 
 <pre><code>
-
 # in the else clause, replace the print statement with this:
 print "Database exists, introspecting:"
 tablenames = ['author', 'book']
@@ -1128,17 +1123,15 @@ cid        | name       | type       | notnull    | dflt_value | pk         |
 Let's load up some data. Fire up your interpreter and type:
 
 <pre><code>
+import sqlite3
+insert = """INSERT INTO author (name) VALUES("Iain M. Banks");"""
+with sqlite3.connect("books.db") as conn:
+    cur = conn.cursor()
+    cur.execute(insert)
+    cur.rowcount
+    cur.close()
     
->>> import sqlite3
->>> insert = """
-... INSERT INTO author (name) VALUES("Iain M. Banks");"""
->>> with sqlite3.connect("books.db") as conn:
-...     cur = conn.cursor()
-...     cur.execute(insert)
-...     cur.rowcount
-...     cur.close()
-...     
-<sqlite3.Cursor object at 0x10046e880>
+&lt;sqlite3.Cursor object at 0x10046e880&gt;
 1
 </code></pre>
 
@@ -1153,7 +1146,6 @@ Did that work?
 Let's query our database to find out:
 
 <pre><code>
-
 query = """SELECT * from author;"""
 with sqlite3.connect("books.db") as conn:
     cur = conn.cursor()
@@ -1175,12 +1167,16 @@ Alright!  We've got data in there.  Let's make it more efficient.
 <h2>Parameterized Statements</h2>
 
 <p>
-Try this:
+Queries can be parameterized.  The parameter style is database dependent, and can be determined from module.paramstyle
+<p>
+<a target="_blank" href="http://www.python.org/dev/peps/pep-0249/#paramstyle">http://www.python.org/dev/peps/pep-0249/#paramstyle</a>
 
 <pre><code>
 
 insert = """INSERT INTO author (name) VALUES(?);"""
+
 authors = [["China Mieville"], ["Frank Herbert"], ["J.R.R. Tolkien"], ["Susan Cooper"], ["Madeline L'Engle"]]
+
 with sqlite3.connect("books.db") as conn:
     cur = conn.cursor()
     cur.executemany(insert, authors)
