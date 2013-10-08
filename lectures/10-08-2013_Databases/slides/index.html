@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+	<title>Isilon System Development with Python, Week 4</title>
+	
+	<!-- Required stylesheet -->
+	<link rel="stylesheet" href="core/deck.core.css">
+	
+	<!-- Extension CSS files go here. Remove or add as needed. -->
+	<link rel="stylesheet" href="extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="extensions/status/deck.status.css">
+	<link rel="stylesheet" href="extensions/hash/deck.hash.css">
+	<link rel="stylesheet" href="extensions/scale/deck.scale.css">
+
+	<!-- Style theme. More available in /themes/style/ or create your own. -->
+    <!-- default
+	<link rel="stylesheet" href="themes/style/neon.css">
+    -->
+	<link rel="stylesheet" href="themes/style/web-2.0.css">
+
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+    <!--
+	<link rel="stylesheet" href="themes/transition/fade.css">
+    -->
+	<link rel="stylesheet" href="themes/transition/horizontal-slide.css">
+	
+	<!-- Required Modernizr file -->
+	<script src="modernizr.custom.js"></script>
+</head>
+<body class="deck-container">
+
+
+<section class="slide">
+	<h2>System Development with Python</h2>
+    <h3>Week 4, Databases</h3>
+    <p>October 08, 2013</p>
+    <p>Joseph Sheedy</p>
+    <p><i>joseph.sheedy@gmail.com</i></p>
+    <p>Git repository:  <a href="https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython" target="_blank">https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython</a></p>
+    <p>Props to Cris Ewing of UW PCE for a bulk of this material</p>
+</section>
+
+<section class="slide">
+    <h2>System Development with Python</h2>
+        <p>To view the slides, you can either browse to the location of your git checkout, or serve it with the Python webserver:
+<pre>
+<code>
+python -m SimpleHTTPServer
+</code>
+</pre>
+</section>
+
+<section class="slide">
+    <h2>Today's topics</h2>
+    <ul>
+        <li>Relational databases and basic SQL
+        <li>Python's DB API
+        <li>Working with a database
+<!--
+        <li>ORM
+        <li>Non-relational databases (NoSQL)
+-->
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Relational Databases</h2>
+
+    <h3>A quick overview of SQL: History, Concepts, and Syntax</h3>
+</section>
+
+<section class="slide">
+    <h2>SQL - Structured Query Language</h2>
+<ul>
+    <li> First invented in the early 1970s at IBM
+    <li> Based on Relational Algebra and Tuple Relational Calculus
+    <li> Used to get at data stored in their System-R database management system
+    <li> Picked up by Relational Software (now Oracle) in the late 1970s
+    <li> Oracle V2, the first commercial Relational Database released in 1979
+    <li> IBM followed with System/38, SQL/DS and DB2 between 1979 and 1983
+</ul>
+<p><a target="_blank" href="http://en.wikipedia.org/wiki/SQL">http://en.wikipedia.org/wiki/SQL</a>
+</section>
+<section class="slide">
+    <h2>What is SQL </h2>
+
+<ul>
+<li>
+SQL, and Relational Database Management Systems (RDBMS) have been the de-facto
+standard for data persistence for 30+ years
+
+<li>
+
+Currently, there are more than 100 RDBMS available, both proprietary and
+open-source.
+
+<li>
+
+Most, if not all, include some implementation of SQL as their query language.
+</ul>
+
+<p><a target="_blank" href="http://en.wikipedia.org/wiki/List_of_relational_database_management_systems">http://en.wikipedia.org/wiki/List_of_relational_database_management_systems</a>
+
+</section>
+<section class="slide">
+    <h2>RDMSs You're Likely to Encounter</h2>
+<h3>Proprietary</h3>
+<ul>
+    <li> MS SQL Server
+    <li> Oracle
+    <li> MySQL Enterprise (Oracle)
+</ul>
+<h3>Open Source</h3>
+<ul>
+    <li> PostgreSQL
+    <li> <a href="https://mariadb.org/">MariaDB (MySQL community)</a>
+    <li> SQLite
+</ul>
+<p>This list is by no means exhaustive
+</section>
+<section class="slide">
+    <h2>SQL/RDBMS Concepts - Tables</h2>
+
+<ul>
+<li>A table consists of <b>rows</b> (also called <b>records</b> and <i>columns</i>)
+
+
+<li>Each row/record represents a single item
+
+
+<li>Each column represents a data point
+
+<li>Most tables will have one column which is considered the <b>primary key</b>
+
+
+<li>This value will uniquely identify a single row out of all the rows in the table
+</ul>
+
+<h3>Example table</h3>
+<p>Here is an example table which represents people in a system:
+</p>
+
+
+<pre>
++----+------------+------------+-----------+
+| id | username   | first_name | last_name |
++====+============+============+===========+
+|  1 | wont_u_b   | Fred       | Rogers    |
++----+------------+------------+-----------+
+|  4 | neuroman   | William    | Gibson    |
++----+------------+------------+-----------+
+|  5 | race       | Roger      | Bannon    |
++----+------------+------------+-----------+
+|  6 | harrywho   | Harry      | Houdini   |
++----+------------+------------+-----------+
+|  7 | whitequeen | Emma       | Frost     |
++----+------------+------------+-----------+
+|  8 | shadowcat  | Kitty      | Pryde     |
++----+------------+------------+-----------+
+</pre>
+
+</section>
+<section class="slide">
+    <h2>SQL concepts - Relations</h2>
+<ul>
+<li>
+You can model things using tables like this.  Adding columns for all sorts
+of different data points
+
+<li>
+
+But what happens when not all of the items in a table share the same data
+points?
+
+<li>
+
+Or what if some of the items need to have more than one of a particular data
+point?
+
+<li>
+
+Leaving columns empty in a row wastes memory and slows down querying.  Use
+relations to solve these types of problems
+</ul>
+
+</section>
+
+<section class="slide">
+    <h2>Types of Relations </h2>
+
+<p>
+There are three basic types of relationships:
+
+
+<ul>
+<li><h3>One-to-one relationships</h3>
+  Best used to represent aspects of an item which are not core to it. Like
+  user (id, password) &rarr; user_profile (preferences, name, address)
+
+<li><h3>Many-to-one relationships</h3>
+  Used to represent relationships of ownership or belonging. Like product &rarr;
+  manufacturer or book &rarr; author
+
+<li><h3>Many-to-many relationships</h3>
+  Used to represent associations or membership.  Like users &rarr; groups or 
+  items &rarr; orders
+
+</ul>
+</section>
+<section class="slide">
+
+<h2> SQL Relations ( ∞ &rarr; 1)</h2>
+
+<p>
+Many-to-one relationships are modelled using Foreign Keys
+
+
+<p>
+The many table has a column which holds the primary key of the row from
+the one table:
+
+<p>
+
+Consider the relationship of books to author:
+
+<h3> Books &rarr; Author </h3>
+
+<h4>People</h4>
+
+
+<pre><code>
++----+-----------+------------+-----------+
+| id | username  | first_name | last_name |
++====+===========+============+===========+
+|  4 | neuroman  | William    | Gibson    |
++----+-----------+------------+-----------+
+|  6 | harrywho  | Harry      | Houdini   |
++----+-----------+------------+-----------+
+</code></pre>
+
+<h4>Books</h4>
+
+<pre><code>
++----+-----------------------------------+--------+
+| id | title                             | author |
++====+===================================+========+
+|  1 | Miracle Mongers and their Methods | 6      |
++----+-----------------------------------+--------+
+|  2 | The Right Way to Do Wrong         | 6      |
++----+-----------------------------------+--------+
+|  3 | Pattern Recognition               | 4      |
++----+-----------------------------------+--------+
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>SQL Relations  (1 &rarr; 1)</h2>
+
+<p>
+One-to-one relationships are really just a special case of Many-to-one, and
+are also modelled with Foreign Keys
+</p>
+
+<p>
+In this case, the column on the related table which holds the primary key of
+the target table has an additional unique constraint, so that only one
+related record can exist
+
+</p><p>
+The classic purpose is for data that doesn't need to be accessed often, and
+is unique per record
+</p><p>
+
+Consider the example of birth records:
+<p>
+
+<h3>Birth Record &rarr; Person</h3>
+
+<h4>People</h4>
+
+<pre><code>
+
++----+-----------+------------+-----------+
+| id | username  | first_name | last_name |
++====+===========+============+===========+
+|  1 | wont_u_b  | Fred       | Rogers    |
++----+-----------+------------+-----------+
+|  4 | neuroman  | William    | Gibson    |
++----+-----------+------------+-----------+
+|  5 | race      | Roger      | Bannon    |
++----+-----------+------------+-----------+
+</code></pre>
+
+<h4>Birth Records</h4>
+
+<pre><code>
+
++----+--------+----------------+--------------+
+| id | person | date           | place        |
++====+========+================+==============+
+|  1 | 1      | March 20, 1928 | Latrobe, PA  |
++----+--------+----------------+--------------+
+|  2 | 4      | March 17, 1948 | Conway, SC   |
++----+--------+----------------+--------------+
+|  3 | 5      | April 1, 1954  | Wilmette, IL |
++----+--------+----------------+--------------+
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>SQL Relations (∞ &rarr; ∞)</h2>
+
+<p>
+Many-to-many relations are a bit trickier
+
+<p>
+
+You can't have a multi-valued field, so there's no way to define a foreign
+key-like construct that would work
+
+<p>
+
+Instead, this relationship is modelled using a join table, which has two
+foreign key fields, one for each side of the relation.
+
+<p>
+
+Beyond these two, other columns can add data points describing the qualities
+of the relation itself
+</p>
+
+</section>
+<section class="slide">
+
+<h2>Group Memberships</h2>
+
+
+    <h3>People</h3>
+<pre><code>
+
+    +----+------------+------------+-----------+
+    | id | username   | first_name | last_name |
+    +====+============+============+===========+
+    |  7 | whitequeen | Emma       | Frost     |
+    +----+------------+------------+-----------+
+    |  8 | shadowcat  | Kitty      | Pryde     |
+    +----+------------+------------+-----------+
+</code></pre>
+
+
+   <h3>Groups</h3>
+
+<pre><code>
+
+    +----+---------------+
+    | id | name          |
+    +====+===============+
+    |  1 | Hellfire Club |
+    +----+---------------+
+    |  2 | X-Men         |
+    +----+---------------+
+</code></pre>
+
+
+<h3>Membership</h3>
+<pre><code>
+    +----+--------+-------+--------+
+    | id | person | group | active |
+    +====+========+=======+========+
+    |  1 | 7      | 1     | False  |
+    +----+--------+-------+--------+
+    |  2 | 7      | 2     | True   |
+    +----+--------+-------+--------+
+    |  3 | 8      | 2     | True   |
+    +----+--------+-------+--------+
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>SQL Syntax</h2>
+
+<p>
+The syntax of SQL can be broken into constructs:
+
+<ul>
+ <li> Statements are discrete units that perform some action, like inserting
+   records or querying
+ <li> Clauses are sub-units of statements which indicate some action or
+   condition
+ <li> Expressions are elements that produce values, either unitary or as
+   tables themselves
+ <li> Predicates are conditionals which produce some boolean or three-valued
+   truth value
+</ul>
+
+<img width="90%" src="img/sql_anatomy.png" />
+
+</section>
+<section class="slide">
+
+<h2>SQL Syntax - Subsets</h2>
+
+<p>
+SQL statements can be thought of as belonging to one of several subsets
+
+<h3>Data Definition</h3>
+<p>
+  Statements in this subset concern the structure of the database itself:
+
+<pre><code>
+    CREATE TABLE "jos_groups" (
+      "group_id" character varying(32) NOT NULL,
+      "name" character varying(255) NOT NULL,
+      "description" text NOT NULL
+    )
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>SQL Syntax - Subsets</h2>
+
+<p>
+
+<h3>Data Manipulation</h3> 
+<p>
+  Statements in this subset concern the altering of data within the database:
+
+<pre><code>
+
+    UPDATE people
+        SET first_name='Bill'
+        WHERE id=4;
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>SQL Syntax - Subsets</h2>
+<p>
+
+
+<h3>Data Query</h3>
+<p>
+  Statements in this subset concern the retrieval of data from within the 
+  database:
+
+<pre><code>
+
+
+    SELECT user_id, COUNT(*) c 
+      FROM (SELECT setting_value AS interests, user_id
+              FROM user_settings 
+              WHERE setting_name = 'interests') raw_uid
+      GROUP BY user_id HAVING c > 1;
+</pre></code>
+</section>
+
+<!-- paste -->
+<section class="slide">
+    <h2>Python's DB API</h2>
+
+    <h3>An introduction to the standard interface for Pythonic database interactions</h3>
+
+</section>
+<section class="slide">
+
+<h2>Why the DB API?</h2>
+
+<p>
+
+Despite the norms of SQL, individual databases have lots of differences
+
+<p>
+
+Programmers don't want to have to think about implementation details for
+underlying systems
+
+<p>
+It would be nice to have a single API to hide these details
+
+<p>
+Any package implementing this API would then be interchangeable
+</section>
+<section class="slide">
+
+<h2>DB-API v1.0</h2>
+
+<p>
+Finalized in 1996, PEP 248 specified DB-API version 1.0 to fulfill this goal:
+
+
+<p>
+<blockquote>
+    This API has been defined to encourage similarity between the Python
+    modules that are used to access databases. By doing this, we hope to
+    achieve a consistency leading to more easily understood modules, code that
+    is generally more portable across databases, and a broader reach of
+    database connectivity from Python.
+</blockquote>
+<a target="_blank" href="http://www.python.org/dev/peps/pep-0248/">http://www.python.org/dev/peps/pep-0248/</a>
+</section>
+<section class="slide">
+
+<h2>DB-API v2.0</h2>
+<p>
+
+By 2001, PEP 249 brought version 2.0 of the DB-API specification, with
+improvements:
+
+<ul>
+
+<li> New column types were added to support all basic data types in "modern" SQL
+<li> New API constants were added to help detect differences between implementations
+<li> The semantics for calling stored procedures were clarified.
+<li> Class-based exceptions were added to improve error handling possibilities
+
+</ul>
+<p>
+
+Discussions are currently underway to push DB-API v3.0, particularly in light
+of the change to Python 3.0
+
+
+<a target="_blank" href="http://www.python.org/dev/peps/pep-0249/">http://www.python.org/dev/peps/pep-0249/</a>
+</section>
+<section class="slide">
+
+<h2>A Note on DB API</h2>
+
+<p>
+It is important to remember that PEP 249 is only a specification
+
+<p>
+There is no code or package for DB-API 2.0 on it's own.  
+
+<p>
+Since 2.5, the Python Standard Library has provided a reference
+implementation of the api 
+<a target="_blank" href="http://docs.python.org/2/library/sqlite3.html">http://docs.python.org/2/library/sqlite3.html</a>
+based on SQLite3
+
+<p>
+Before version 2.5, this package was available as pysqlite
+
+</section>
+<section class="slide">
+
+<h2>Using DB API</h2>
+
+<p>
+To use the DB API with any database other than SQLite3, you must have an
+underlying API package available.
+
+<p>
+    Implementations are available for:
+
+<ul>
+    <li> PostgreSQL (psycopg2, txpostgres, ...)
+    <li> MySQL (mysql-python, PyMySQL, ...)
+    <li> MS SQL Server (adodbapi, pymssql, mxODBC, pyodbc, ...)
+    <li> Oracle (cx_Oracle, mxODBC, pyodbc, ...)
+    <li> and many more...
+</ul>
+
+<a target="_blank" href="http://wiki.python.org/moin/DatabaseInterfaces">http://wiki.python.org/moin/DatabaseInterfaces</a>
+</section>
+<section class="slide">
+
+<h2>Installing API Packages</h2>
+
+<p>
+Common db api packages can be installed using pip 
+
+<pre><code>
+    $ pip install psycopg2
+    $ pip install mysql-python
+    ...
+</code></pre>
+
+<p>
+Most api packages will require that the development headers for the underlying
+database system be available. Without these, the C symbols required for
+communication with the db are not present and the python interface cannot work.
+</p>
+</section>
+<section class="slide">
+
+<h2>Odd Men Out</h2>
+
+<p>
+Some of the db api wrappers have special installation requirements:
+
+
+<p>
+The MS SQL package runs only on Windows and requires pywin32. It is
+included in versions of pywin32 since v211.
+
+<p>
+
+    The cx_Oracle package has binary installers, or can be installed from 
+    source using distutils::
+<pre><code>
+
+        $ python setup.py build
+        $ python setup.py install
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>What Do You Get?</h2>
+
+
+<h3>What is in the DB API?</h3>
+
+</section>
+<section class="slide">
+
+<h2>Globals</h2>
+
+<p>
+DB-API2 implementations provide the following global values:
+
+
+<ul>
+<li>
+    apilevel - 
+      String constant indicating the api version ("1.0" or "2.0")
+
+<li>
+
+    threadsafety - 
+      Integer constant between 0 and 3 indicating the scope in which threads may 
+      safely be used
+
+<li>
+
+    paramstyle -
+      String constant indicating the style of marker used for parameter 
+      substitution in SQL expressions
+
+</ul>
+
+<p>
+These can be used to tailor your program's expectations
+</section>
+<section class="slide">
+
+<h2>A Constructor</h2>
+
+<p>
+DB API provides a constructor connect, which returns a Connection
+object:
+
+
+<pre><code>
+    connect(parameters)
+</code></pre>
+
+<p>
+
+This can be considered the entry point for the module. Once you've got a
+connection, everything else flows from there.
+
+<p>
+
+The parameters required and accepted by the connect constructor will
+vary from implementation to implementation, since they are highly specific to
+the underlying database.
+
+</section>
+<section class="slide">
+
+<h2>A Connection</h2>
+
+<p>
+Some methods may not be supported by all implementations:
+
+<ul>  
+<li>    .close() - 
+      Closes the connection to the database permanently.  Attempts to use the 
+      connection after calling this will raise a DB-API Error
+    
+    
+   <li> .commit() - 
+      explicitly commit any pending transactions to the databse.  The method
+      should be a no-op if the underlying db does not support transactions.
+
+    
+    <li>.rollback()
+      This optional method causes a transaction to be rolled back to the
+      starting point.  It may not be implemented everywhere.
+    
+    
+    <li>.cursor()
+      returns a Cursor object which uses this Connection.
+
+<a target="_blank" href="http://en.wikipedia.org/wiki/Cursor_(databases)">http://en.wikipedia.org/wiki/Cursor_(databases)</a>
+</ul>
+
+</section>
+<section class="slide">
+
+<h2>A Cursor - settings</h2>
+
+
+<p>
+You can use a few values to control the rows returned by the cursor:
+
+
+   <ul>
+<li> 
+    .arraysize - 
+      An integer which controls how many rows are returned at a time by 
+      .fetchmany (and optionally how many to send at a time with 
+      .executemany) Defaults to 1
+    
+<li> 
+    .setinputsizes(sizes) - 
+      Used to set aside memory regions for paramters passed to an operation
+
+<li> 
+    
+    .setoutputsize(size[, column]) - 
+      Used to control buffer size for large columns returned by an operation
+      (BLOB or LONG types, for example).
+
+</ul>
+
+<p>
+The final two methods may be implemented as no-ops
+
+</section>
+<section class="slide">
+
+<h2>A Cursor - operations</h2>
+
+<p>
+
+The cursor should be used to run operations on the database:
+
+   <ul>
+<li> 
+    .execute(operation[, parameters]) - 
+      Prepares and then runs a database operation. Parameter style (seq or 
+      mapping) and markers are implementation specific 
+
+   <li> 
+    .executemany(operation[, seq_of_params])
+      Prepares and the runs an operations once for each set of parameters 
+      provided (this replaces the old v1 behavior of passing a seq to 
+      .execute).
+    
+   <li> 
+    
+    .callproc(procname[, parameters])
+      Calls a stored DB procedure with the provided parameters. Returns a 
+      modified version of the provided parameters with output and 
+      input/output parameters replaced
+</ul>
+</section>
+<section class="slide">
+
+<h2>A Cursor - attributes</h2>
+
+
+<p>
+These attributes of Cursor can help you learn about the results of
+operations:
+
+   <ul>
+<li> 
+    .rowcount - 
+      Tells how many rows have been returned or affected by the last 
+      operation. The number will be -1 if no operation has been performed.
+    
+<li> 
+    
+    .description
+      Returns a sequence of 7-item sequences describing each of the columns in
+      the result row(s) returned (None if no operation has been performed):
+      
+<ul>    
+    <li> name 
+    <li> type_code 
+    <li> display_size (optional)
+    <li> internal_size (optional)
+    <li> precision (optional)
+    <li> scale (optional)
+    <li> null_ok (optional)
+
+</ul>
+</ul>
+</section>
+
+<section class="slide">
+<h2>A Cursor - results</h2>
+
+<p>
+
+The return value .execute or .executemany is undefined and should not
+be used.  These methods are the way to get results after an operation:
+
+
+<ul>    
+<li>
+    .fetchone() - 
+      Returns the next row from a result set, and None when none remain.
+    
+<li>
+    
+    .fetchmany([size=cursor.arraysize]) - 
+      Returns a sequence of size rows (or fewer) from a result set. An empty
+      sequence is returned when no rows remain. Defaults to arraysize
+<li>
+
+    
+    .fetchall() - 
+      Returns all (remaining) rows from a result set.  This behavior may be
+      affected by arraysize.
+
+</ul>
+<p>
+Note that each of these methods will raise a DB API Error if no operation
+has been performed (or if no result set was produced)
+
+</section>
+
+<section class="slide">
+<h2>Data Types and Constructors</h2>
+
+<p>
+
+The DB-API provides types and constructors for data:
+
+<ul>
+    <li> Date(year, month, day) - constructs an object holding a date value
+    <li> Time(hour, min, sec) - constructs an object holding a time value
+    <li> Timestamp(y, m, d, h, min, s) - constructs an object holding a timestamp
+</ul>
+
+
+<p>
+Each of the above has a corresponding FromTicks(ticks) which
+returns the same type given a single integer argument (seconds since the
+epoch)
+
+<p>
+<ul>
+<li> Binary(string) - constructs an object to hold long binary string data
+<li> STRING - a type to describe columns that hold string values (CHAR)
+<li> BINARY - a type to describe long binary columns (BLOB, RAW)
+<li> NUMBER - a type to describe numeric columns
+<li> DATETIME - a type to describe date/time/datetime columns
+<li> ROWID - a type to describe the Row ID column in a database
+</ul>
+
+
+<p>
+SQL NULL values are represented by Python's None
+
+</section>
+<section class="slide">
+
+<h2>Exceptions</h2>
+
+<p>
+The DB API specification requires implementations to create the following 
+hierarchy of custom Exception classes:
+
+
+<pre>
+
+    StandardError
+    |__Warning
+    |__Error
+       |__InterfaceError (a problem with the db api)
+       |__DatabaseError (a problem with the database)
+          |__DataError (bad data, values out of range, etc.)
+          |__OperationalError (the db has an issue out of our control)
+          |__IntegrityError
+          |__InternalError
+          |__ProgrammingError (something wrong with the operation)
+          |__NotSupportedError (the operation is not supported)
+</pre>
+</section>
+<section class="slide">
+
+<h2>End whirlwind tour of DB-API</h2>
+
+<p>
+Aside from some custom extensions not required by the specification, that's
+it.
+
+
+<p>
+So how do you interact with this?
+
+<p>
+Let's take a short break, and then find out.
+
+
+<!-- paste -->
+
+</section>
+<section class="slide">
+
+<h2>Using Python's sqlite3 Module</h2>
+
+<h3>A walk through the Standard Library's reference implementation of DB API 2</h3>
+
+<p>
+A reminder that the resources I'll be referencing are available in the
+examples/ directory of the repository
+</p>
+
+</section>
+<section class="slide">
+
+<h2>Getting Started</h2>
+
+<p>
+Start by moving to the examples folder, opening a Python interpreter and
+importing the sqlite3 module:
+</p>
+
+<pre><code>
+    $ cd examples
+    $ python
+    Python 2.7.1 (r271:86832, Apr  4 2011, 22:22:40)
+    [GCC 4.2.1 (Apple Inc. build 5664)] on darwin
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import sqlite3
+
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>Learning About the Module</h2>
+
+<p>
+We can poke the module a bit to learn about it:
+
+<pre><code>
+    >>> sqlite3.sqlite_version
+    '3.6.12'
+    >>> sqlite3.apilevel
+    '2.0'
+    >>> sqlite3.paramstyle
+    'qmark'
+    >>> sqlite3.threadsafety
+    1
+
+    ===== =====================================
+    level meaning
+    ===== =====================================
+    0     Not safe
+    1     Safe at Module level only
+    2     Safe at Module and Connection
+    3     Safe at Module, Connection and Cursor
+    ===== =====================================
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>Connecting</h2>
+
+<p>
+SQLite3 is a file-based system, and it will create the file it needs if one
+doesn't exist. We can create a sqlite3 database just by attempting to connect
+to it:
+<pre><code>
+
+
+    >>> import createdb
+    >>> createdb.main()
+    Need to create database and schema
+    >>> reload(createdb)
+    <module 'createdb' from 'createdb.pyc'>
+    >>> createdb.main()
+    Database exists, assume schema does, too.
+</code></pre>
+
+<p>
+Let's see how this works
+
+</section>
+<section class="slide">
+
+<h2>edit createdb.py</h2>
+
+<p>
+Open createdb.py in your favorite text editor:
+
+<pre><code>
+
+import os
+import sqlite3
+
+DB_FILENAME = 'books.db'
+DB_IS_NEW = not os.path.exists(DB_FILENAME)
+
+def main():
+    conn =  sqlite3.connect(DB_FILENAME)
+    if DB_IS_NEW:
+        print 'Need to create database and schema'
+    else:
+        print 'Database exists, assume schema does, too.'
+    conn.close()
+
+if __name__ == '__main__':
+    main()
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>Set Up The Schema</h2>
+
+<p>
+Make the following changes to createdb.py:
+
+<pre><code>
+
+import os
+import sqlite3
+
+DB_FILENAME = 'books.db'
+SCHEMA_FILENAME = 'ddl.sql' #  this is new
+DB_IS_NEW = not os.path.exists(DB_FILENAME)
+
+def main():
+    with sqlite3.connect(DB_FILENAME) as conn:
+        if DB_IS_NEW: # A whole new if clause:
+            print 'Creating schema'
+            with open(SCHEMA_FILENAME, 'rt') as f:
+                schema = f.read()
+            conn.executescript(schema)
+        else:
+            print 'Database exists, assume schema does, too.'
+    # delete the conn.close() that was here.
+</code></pre>
+
+</section>
+<section class="slide">
+<h2>Verify Your Work</h2>
+
+<p>
+Quit your python interpreter and delete the file books.db that should be
+in the examples folder
+
+<p>
+    Then run the script from the command line to try it out:
+
+<pre><code>
+
+$ python createdb.py
+Creating schema
+$ python createdb.py
+Database exists, assume schema does, too.
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>Introspect the Database</h2>
+
+<p>
+Add the following to createdb.py:
+
+<pre><code>
+
+# in the imports, add this line:
+from utils import show_table_metadata
+</code></pre>
+
+<pre><code>
+
+# in the else clause, replace the print statement with this:
+print "Database exists, introspecting:"
+tablenames = ['author', 'book']
+cursor = conn.cursor()
+for name in tablenames:
+    print "\n"
+    show_table_metadata(cursor, name)
+</code></pre>
+
+<p>
+Then try running python createdb.py again
+</section>
+<section class="slide">
+
+<h2>My Results</h2>
+<pre><code>
+
+$ python createdb.py
+Table Metadata for 'author':
+cid        | name       | type       | notnull    | dflt_value | pk         |
+-----------+------------+------------+------------+------------+------------+-
+0          | authorid   | INTEGER    | 1          | None       | 1          |
+-----------+------------+------------+------------+------------+------------+-
+1          | name       | TEXT       | 0          | None       | 0          |
+-----------+------------+------------+------------+------------+------------+-
+
+
+Table Metadata for 'book':
+cid        | name       | type       | notnull    | dflt_value | pk         |
+-----------+------------+------------+------------+------------+------------+-
+0          | bookid     | INTEGER    | 1          | None       | 1          |
+-----------+------------+------------+------------+------------+------------+-
+1          | title      | TEXT       | 0          | None       | 0          |
+-----------+------------+------------+------------+------------+------------+-
+2          | author     | INTEGER    | 1          | None       | 0          |
+-----------+------------+------------+------------+------------+------------+-
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>Inserting Data</h2>
+<p>
+Let's load up some data. Fire up your interpreter and type:
+
+<pre><code>
+    
+>>> import sqlite3
+>>> insert = """
+... INSERT INTO author (name) VALUES("Iain M. Banks");"""
+>>> with sqlite3.connect("books.db") as conn:
+...     cur = conn.cursor()
+...     cur.execute(insert)
+...     cur.rowcount
+...     cur.close()
+...     
+<sqlite3.Cursor object at 0x10046e880>
+1
+</code></pre>
+
+<p>
+Did that work?
+</section>
+<section class="slide">
+
+<h2>Querying Data</h2>
+<p>
+
+Let's query our database to find out:
+
+<pre><code>
+
+query = """SELECT * from author;"""
+with sqlite3.connect("books.db") as conn:
+    cur = conn.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
+    for row in rows:
+        print row
+
+&lt;sqlite3.Cursor object at 0x10046e8f0&gt;
+(1, u'Iain M. Banks')
+
+</code></pre>
+<p>
+
+Alright!  We've got data in there.  Let's make it more efficient.
+</section>
+<section class="slide">
+
+<h2>Parameterized Statements</h2>
+
+<p>
+Try this:
+
+<pre><code>
+
+insert = """INSERT INTO author (name) VALUES(?);"""
+authors = [["China Mieville"], ["Frank Herbert"], ["J.R.R. Tolkien"], ["Susan Cooper"], ["Madeline L'Engle"]]
+with sqlite3.connect("books.db") as conn:
+    cur = conn.cursor()
+    cur.executemany(insert, authors)
+    print cur.rowcount
+    cur.close()
+
+&lt;sqlite3.Cursor object at 0x10046e8f0&gt;
+5
+</code></pre>
+
+</section>
+<section class="slide">
+<h2>Check Your Work</h2>
+<p>
+
+Again, query the database:
+
+<pre><code>
+
+query = """SELECT * from author;"""
+with sqlite3.connect("books.db") as conn:
+    cur = conn.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
+    for row in rows:
+        print row
+
+&lt;sqlite3.Cursor object at 0x10046e8f0&gt;
+(1, u'Iain M. Banks')
+...
+(4, u'J.R.R. Tolkien')
+(5, u'Susan Cooper')
+(6, u"Madeline L'Engle")
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>Transactions</h2>
+
+<p>
+
+Transactions let you group a number of operations together, allowing you to
+make sure they worked before you actually push the results into the
+database.
+
+<p>
+In SQLite3, operations that belong to the Data Manipulation subset
+(INSERT, UPDATE, DELETE) require an explicit commit unless
+auto-commit has been enabled.
+
+<p>
+So far, commits have been hidden from us by the with statement. The
+context manager takes care of committing when the context closes (at the end 
+of the with statement)
+
+<p>
+Let's add some code so we can see the effect of transactions.
+
+</section>
+
+<section class="slide">
+
+<h2>Populating the Database</h2>
+
+<p>
+Let's start by seeing what happens when you try to look for newly added data
+before the insert transaction is committed.
+
+<p>
+
+Begin by quitting your interpreter and deleting books.db.  
+
+<p>
+
+Then re-create the database, empty:
+<pre><code>
+
+$ python createdb.py
+Creating schema
+</code></pre>
+
+</section>
+<section class="slide">
+<h2>Setting Up the Test</h2>
+
+<p>
+In populatedb.py, add this code at the end of the file:
+
+<pre><code>
+
+with sqlite3.connect(DB_FILENAME) as conn1:
+    print "\nOn conn1, before insert:"
+    show_authors(conn1)
+    
+    authors = ([author] for author in AUTHORS_BOOKS.keys())
+    cur = conn1.cursor()
+    cur.executemany(author_insert, authors)
+    print "\nOn conn1, after insert:"
+    show_authors(conn1)
+    
+    with sqlite3.connect(DB_FILENAME) as conn2:
+        print "\nOn conn2, before commit:"
+        show_authors(conn2)
+        
+        conn1.commit()
+        print "\nOn conn2, after commit:"
+        show_authors(conn2)
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>Running the Test</h2>
+
+<p>
+
+Quit your python interpreter and run the populatedb.py script:
+
+<pre><code>
+$ python populatedb.py
+On conn1, before insert:
+no rows returned
+On conn1, after insert:
+(1, u'China Mieville')
+(2, u'Frank Herbert')
+(3, u'Susan Cooper')
+(4, u'J.R.R. Tolkien')
+(5, u"Madeline L'Engle")
+On conn2, before commit:
+no rows returned
+On conn2, after commit:
+(1, u'China Mieville')
+(2, u'Frank Herbert')
+(3, u'Susan Cooper')
+(4, u'J.R.R. Tolkien')
+(5, u"Madeline L'Engle")
+</code></pre>
+
+</section>
+<section class="slide">
+<h2>Rollback</h2>
+
+<p>
+That's all well and good, but what happens if an error occurs?
+
+<p>
+
+Transactions can be rolled back in order to wipe out partially completed work.
+
+<p>
+
+Like with commit, using connect as a context manager in a with
+statement will automatically rollback for exceptions.
+
+<p>
+
+Let's rewrite our populatedb script so it explicitly commits or rolls back a
+transaction depending on exceptions occurring
+
+</section>
+<section class="slide">
+<h2>edit populatedb.py (slide 1)</h2>
+
+<p>
+First, add the following function above the if __name__ == '__main__'
+block:
+<pre><code>
+def populate_db(conn):
+    authors = ([author] for author in AUTHORS_BOOKS.keys())
+    cur = conn.cursor()
+    cur.executemany(author_insert, authors)
+    
+    for author in AUTHORS_BOOKS.keys():
+        params = ([book, author] for book in AUTHORS_BOOKS[author])
+        cur.executemany(book_insert, params)
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>edit populatedb.py (slide 2)</h2>
+
+<p>
+Then, in the runner:
+<pre><code>
+with sqlite3.connect(DB_FILENAME) as conn1:
+    with sqlite3.connect(DB_FILENAME) as conn2:
+        try:
+            populate_db(conn1)
+            print "\nauthors and books on conn2 before commit:"
+            show_authors(conn2)
+            show_books(conn2)
+        except Exception:
+            conn1.rollback()
+            print "\nauthors and books on conn2 after rollback:"
+            show_authors(conn2)
+            show_books(conn2)
+            raise
+        else:
+            conn1.commit()
+            print "\nauthors and books on conn2 after commit:"
+            show_authors(conn2)
+            show_books(conn2)
+</code></pre>
+</section>
+<section class="slide">
+
+<h2>Try it Out</h2>
+
+<p>
+Remove books.db and recrete the database, then run our script:
+
+<pre><code>
+$ rm books.db
+$ python createdb.py
+Creating schema
+$ python populatedb.py
+
+
+authors and books on conn2 after rollback:
+no rows returned
+no rows returned
+Traceback (most recent call last):
+  File "populatedb.py", line 57, in <module>
+    populate_db(conn1)
+  File "populatedb.py", line 46, in populate_db
+    cur.executemany(book_insert, params)
+sqlite3.InterfaceError: Error binding parameter 0 - probably unsupported type.
+</code></pre>
+
+</section>
+<section class="slide">
+
+<h2>Oooops, Fix It</h2>
+
+<p>
+Okay, we got an error, and the transaction was rolled back correctly.
+
+<p>
+    Open utils.py and find this:
+
+<pre><code>
+'Susan Cooper': ["The Dark is Rising", ["The Greenwitch"]],
+</code></pre>
+<p>
+    Fix it like so:
+    
+<pre><code>
+'Susan Cooper': ["The Dark is Rising", "The Greenwitch"],
+</code></pre>
+
+<p>
+It appears that we were attempting to bind a list as a parameter.  Ooops.
+
+</section>
+<section class="slide">
+<h2>Try It Again</h2>
+
+<p>
+    Now that the error in our data is repaired, let's try again:
+<pre><code>
+
+$ python populatedb.py
+
+Reporting authors and books on conn2 before commit:
+no rows returned
+no rows returned
+Reporting authors and books on conn2 after commit:
+(1, u'China Mieville')
+(2, u'Frank Herbert')
+(3, u'Susan Cooper')
+(4, u'J.R.R. Tolkien')
+(5, u"Madeline L'Engle")
+(1, u'Perdido Street Station', 1)
+(2, u'The Scar', 1)
+(3, u'King Rat', 1)
+(4, u'Dune', 2)
+(5, u"Hellstrom's Hive", 2)
+(6, u'The Dark is Rising', 3)
+(7, u'The Greenwitch', 3)
+(8, u'The Hobbit', 4)
+(9, u'The Silmarillion', 4)
+(10, u'A Wrinkle in Time', 5)
+(11, u'A Swiftly Tilting Planet', 5)
+</code></pre>
+
+</section>
+<section class="slide">
+<h2>Isolation</h2>
+
+<p>
+So far, our transactions have been managed.  Either explicitly by us, or 
+automatically by the context manager statement with
+
+<p>
+This behavior is the result of an aspect of the database connection called the
+isolation level. There are three isolation levels available:  
+
+<ul>
+
+<li> DEFERRED - Locks the database once changes have begun to be written to
+  the filesystem.  Read-only operations are not blocked
+<li> IMMEDIATE - Locks the database as soon as a transaction is begun.  
+  Read-only operations are not blocked
+<li> EXCLUSIVE - Locks the database as soon as a transaction is begun. This
+  blocks any read-only operations as well
+</ul>
+
+<p>
+The default level is DEFERRED
+</section>
+<section class="slide">
+
+<h2>Autocommit</h2>
+
+<p>
+The isolation level of a connection can be set with a keyword argument provided
+to the connect constructor:
+
+
+<pre><code>
+    con = sqlite3.connect('mydb.db', isolation_level="EXCLUSIVE")
+</code></pre>
+
+<p>
+If you explicitly set this argument to None, you can enable autocommit
+behavior.  
+
+<p>
+If autocommit is enabled, then any DML operations that occur on a connection 
+will be immediately committed
+
+</section>
+<section class="slide">
+<h2>Testing Autocommit</h2>
+
+<p>
+    First, edit populatedb.py:
+
+
+<pre><code>
+with sqlite3.connect(DB_FILENAME,
+                     isolation_level=None) as conn1:
+    with sqlite3.connect(DB_FILENAME,
+                         isolation_level=None) as conn2:
+
+</code></pre>
+
+<p>
+Next, undo your changes to utils.py so that the error we had will happen
+again
+
+<p>
+    Finally, delete books.db, recreate it and test the populate script::
+<pre><code>
+$ rm books.db
+$ python createdb.py
+Creating schema
+$ python populatedb.py
+</code></pre>
+
+</section>
+<section class="slide">
+<h2>The Result</h2>
+
+
+<pre><code>
+authors and books on conn2 after rollback:
+(1, u'China Mieville')
+(2, u'Frank Herbert')
+(3, u'Susan Cooper')
+(4, u'J.R.R. Tolkien')
+(5, u"Madeline L'Engle")
+(1, u'Perdido Street Station', 1)
+(2, u'The Scar', 1)
+(3, u'King Rat', 1)
+(4, u'Dune', 2)
+(5, u"Hellstrom's Hive", 2)
+(6, u'The Dark is Rising', 3)
+Traceback (most recent call last):
+  File "populatedb.py", line 57, in <module>
+    populate_db(conn1)
+  File "populatedb.py", line 46, in populate_db
+    cur.executemany(book_insert, params)
+sqlite3.InterfaceError: Error binding parameter 0 - probably unsupported type.
+
+</code></pre>
+</section>
+<section class="slide">
+<h2>EXCLUSIVE isolation</h2>
+
+<p>
+There's not a whole lot of difference between the default "DEFERRED" isolation
+level and "IMMEDIATE"
+
+<p>
+
+There's quite a large difference, though for the "EXCLUSIVE" level.  
+
+<p>
+Open threaded.py in your editors.  
+
+<p>
+This is an example of using our existing database population setup in a
+threaded environment.  One thread will load the database, the other will read
+it.  
+
+<p>
+Take a few moments to review the control flow here.  What should happen?
+
+</section>
+<section class="slide">
+<h2>Testing It</h2>
+<p>
+First, re-fix the bug in our utils.py file so that we don't get errors
+when running this test.
+
+<p>
+    Then, kill the old database, recreate it and run our new script:
+<pre><code>
+
+$ rm books.db
+$ python createdb.py
+Creating schema
+$ python threaded.py
+
+</code></pre>
+</section>
+<section class="slide">
+<h2>The Results</h2>
+
+<pre><code>
+
+2013-04-30 15:37:37,556 (Writer    ) connecting
+2013-04-30 15:37:37,556 (Reader    ) waiting to sync
+2013-04-30 15:37:37,556 (Writer    ) connected
+2013-04-30 15:37:37,557 (Writer    ) changes made
+2013-04-30 15:37:37,557 (Writer    ) waiting to sync
+2013-04-30 15:37:39,556 (MainThread) sending sync event
+2013-04-30 15:37:39,557 (Reader    ) beginning read
+2013-04-30 15:37:39,557 (Reader    ) beginning read
+2013-04-30 15:37:39,557 (Writer    ) PAUSING
+2013-04-30 15:37:42,559 (Writer    ) CHANGES COMMITTED
+2013-04-30 15:37:42,590 (Reader    ) selects issued
+(1, u'China Mieville')
+(2, u'Frank Herbert')
+(3, u'Susan Cooper')
+(4, u'J.R.R. Tolkien')
+(5, u"Madeline L'Engle")
+2013-04-30 15:37:42,590 (Reader    ) results fetched
+2013-04-30 15:37:42,590 (Reader    ) beginning read
+2013-04-30 15:37:42,590 (Reader    ) selects issued
+(1, u'Perdido Street Station', 1)
+(2, u'The Scar', 1)
+(3, u'King Rat', 1)
+(4, u'Dune', 2)
+(5, u"Hellstrom's Hive", 2)
+(6, u'The Dark is Rising', 3)
+(7, u'The Greenwitch', 3)
+(8, u'The Hobbit', 4)
+(9, u'The Silmarillion', 4)
+(10, u'A Wrinkle in Time', 5)
+(11, u'A Swiftly Tilting Planet', 5)
+2013-04-30 15:37:42,591 (Reader    ) results fetched
+</code></pre>
+
+</section>
+
+<section class="slide">
+    <h2>The End</h2>
+    <h2>Questions?</h2>
+</section>
+
+<!-- End slides. -->
+
+
+<!-- Begin extension snippets. Add or remove as needed. -->
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+<!-- End extension snippets. -->
+
+
+<!-- Required JS files. -->
+<script src="jquery-1.7.2.min.js"></script>
+<script src="core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="core/deck.core.js"></script>
+<script src="extensions/hash/deck.hash.js"></script>
+<script src="extensions/menu/deck.menu.js"></script>
+<script src="extensions/goto/deck.goto.js"></script>
+<script src="extensions/status/deck.status.js"></script>
+<script src="extensions/navigation/deck.navigation.js"></script>
+<script src="extensions/scale/deck.scale.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+	$(function() {
+		$.deck('.slide');
+	});
+</script>
+</body>
+</html>
