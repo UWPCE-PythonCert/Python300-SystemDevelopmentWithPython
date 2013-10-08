@@ -26,6 +26,6 @@ AUTHORS_BOOKS = {
     'China Mieville': ["Perdido Street Station", "The Scar", "King Rat"],
     'Frank Herbert': ["Dune", "Hellstrom's Hive"],
     'J.R.R. Tolkien': ["The Hobbit", "The Silmarillion"],
-    'Susan Cooper': ["The Dark is Rising", ["The Greenwitch"]],
+    'Susan Cooper': ["The Dark is Rising", "The Greenwitch"],
     'Madeline L\'Engle': ["A Wrinkle in Time", "A Swiftly Tilting Planet"]
 }

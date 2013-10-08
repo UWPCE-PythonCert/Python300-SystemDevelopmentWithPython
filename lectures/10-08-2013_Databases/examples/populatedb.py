@@ -41,4 +41,4 @@ if __name__ == '__main__':
         print "Database does not yet exist, please import `createdb` first"
         sys.exit(1)
     
-    print "Do something cool here"
+    raise NotImplementedError("Populate DB not implemented")
