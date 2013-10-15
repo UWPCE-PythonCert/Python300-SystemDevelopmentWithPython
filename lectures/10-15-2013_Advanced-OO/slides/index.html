@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=1024, user-scalable=no">
+
+	<title>Isilon Advanced Python Week 5 : Advanced OO</title>
+	
+	<!-- Required stylesheet -->
+	<link rel="stylesheet" href="core/deck.core.css">
+	
+	<!-- Extension CSS files go here. Remove or add as needed. -->
+	<link rel="stylesheet" href="extensions/goto/deck.goto.css">
+	<link rel="stylesheet" href="extensions/menu/deck.menu.css">
+	<link rel="stylesheet" href="extensions/navigation/deck.navigation.css">
+	<link rel="stylesheet" href="extensions/status/deck.status.css">
+	<link rel="stylesheet" href="extensions/hash/deck.hash.css">
+	<link rel="stylesheet" href="extensions/scale/deck.scale.css">
+
+	<!-- Style theme. More available in /themes/style/ or create your own. -->
+    <!-- default
+	<link rel="stylesheet" href="themes/style/neon.css">
+    -->
+	<link rel="stylesheet" href="themes/style/web-2.0.css">
+
+	
+	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
+    <!--
+	<link rel="stylesheet" href="themes/transition/fade.css">
+    -->
+	<link rel="stylesheet" href="themes/transition/horizontal-slide.css">
+	
+	<!-- Required Modernizr file -->
+	<script src="modernizr.custom.js"></script>
+</head>
+<body class="deck-container">
+
+<!-- Begin slides. Just make elements with a class of slide. -->
+
+<section class="slide">
+	<h2>Advanced OO in Python</h2>
+    <p>October 15, 2013</p>
+    <p>Joseph Sheedy</p>
+    <p><i>joseph.sheedy@gmail.com</i></p>
+    <p>Git repository:  <a href="https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython" target="_blank">https://github.com/UWPCE-PythonCert/Python300-SystemDevelopmentWithPython</a></p>
+</section>
+
+<section class="slide">
+	<h2>Today's topics</h2>
+    <ul>
+<!--
+        <li>Review of @decorators</li>
+        <li>Review of debugging</li>
+-->
+        <li>Python class styles</li>
+        <li>Inheritance</li>
+        <li>Multiple inheritance and the Diamond Problem
+        <li>__init__ and super()
+        <li>Properties</li>
+        <li>metaclasses</li>
+    </ul>
+
+</section>
+
+<section class="slide">
+    <h2>Object Oriented programming in Python</h2>
+    <p>Object Oriented Programming (OOP) is a programming paradigm which encapsulates data and functions together in the form of objects</p> 
+    <ul>
+        <li>Old and new style classes</li>
+        <li>Interfaces</li>
+        <li>Multiple inheritance</li>
+        <li>@classmethods</li>
+        <li>object</li>
+        <li>super()</li>
+        <li>__init__</li>
+
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2>Old and New classes</h2>
+    <p>Python is an evolving language.   As of Python 2.2, we have old-style and new-style classes.  The distinction disappears in Python 3.  
+    <p>New-style classes were introduced to unify user defined classes and built-in types.
+    <p>This allows the extension of built-in types, for instance 
+    <pre><code>
+class MyInt(int): pass
+</code></pre>
+
+
+    <p>To make a new-style class, derive from any other new-style class, or <i>object</i></p>
+<pre>
+<code>
+class C(object):
+    def __init__(self):
+        # wham, new style class
+        pass
+
+</code>
+</pre>
+
+<p>Now look for yourself the differences between new-style and old-style classes by
+<ul>
+    <li>defining a class of each type
+    <li>instantiate each class
+    <li>run dir(instance) to see the attributes of each object
+</ul>
+    <p>
+        <a target="_blank" href="http://www.python.org/doc/newstyle/">http://www.python.org/doc/newstyle/</a>
+        <br />
+        <a target="_blank" href="http://docs.python.org/2/reference/datamodel.html">http://docs.python.org/2/reference/datamodel.html</a>
+        <br />
+        <a target="_blank" href="http://stackoverflow.com/questions/54867/old-style-and-new-style-classes-in-python">http://stackoverflow.com/questions/54867/old-style-and-new-style-classes-in-python</a>
+    </p>
+</section>
+
+<section class="slide">
+    <h2>New Style</h2>
+    <p style="font-size:2em">New Style: everything is an object, including classes  
+    <p>All per-object data in instance attributes is stored in __dict__
+    <p>Class definition is stored in __class__
+    <p>Class attributes are accessible through the instance
+    <p>Reference counting, weak references, and cyclic garbage collection are handled for you
+    <p>You almost always want new-style classes.  
+    <p>super(), for instance, doesn't work with old-style classes.  
+</section>
+
+<section class="slide">
+    <h2>since a class is just an object, what is its' class?</h2>
+</section>
+
+<section class="slide">
+    <h2>New Style</h2>
+    <p>The class of Class is a metaclass
+    <p>a metaclass can be used to dynamically create a class
+    <p>the metaclass, being a class, has a metaclass
+    <p>The base metaclass is type
+</section>
+
+<section class="slide">
+    <h2>type</h2>
+    <p>
+<pre>
+type?
+Type:       type
+String Form:<type 'type'>
+Namespace:  Python builtin
+Docstring:
+type(object) -> the object's type
+type(name, bases, dict) -> a new type
+</pre>
+
+<p class="slide"> Hold on...
+<pre>
+type(type)
+Out[1]: type
+</pre>
+</p>
+    
+</section>
+
+<section class="slide">
+    <h2>type magic</h2>
+    <p>With one argument, type() returns the type of the argument
+    <p>With 3 arguments, type() returns a new class
+<pre>
+  type(name of the class,
+ 
+       tuple of the parent class (for inheritance, can be empty),
+ 
+       dictionary containing attributes names and values)
+</pre>
+
+</section>
+
+<section class="slide">
+<h2>using type() to build a class</h2>
+<p>using the class keyword is more syntactic sugar, we can get by without it
+<pre><code>
+class MyClass(object):
+    x = 1
+</code></pre>
+<p>OR
+<p>
+<pre><code>
+MyClass = type('MyClass', (), {'x': 1})
+</code></pre>
+
+</section>
+
+<section class="slide">
+<h2>adding methods to a class built with type()</h2>
+<p>Just define a function with the correct signature and add it to the attr dictionary
+<pre><code>
+def my_method(self):
+    print "called my_method, x = %s" % self.x
+
+MyClass = type('MyClass',(), {'x': 1, 'my_method': my_method})
+o = MyClass()
+o.my_method()
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Metaclass example</h2>
+<p>Consider wanting a metaclass which mangles all attribute names</p>
+<pre>
+jk
+</section>
+
+
+<section class="slide">
+    <h2>__new__, the object constructor</h2>
+    <p>Unlike __init__, __new__ is a static method, not an instance method
+    <p>For historical reasons, this is a static method instead of a class method
+    <p>Called with the same arguments as __init__
+    <p>Allows for immutable types, data is set at construction time
+    <p>Can return new or existing objects, of any type
+    <p>__init__ is still called once the object is stood up to initialize it
+</section>
+
+<section class="slide">
+    <h2>__new__ example</h2>
+<pre><code>
+class ContrainedInt(int):
+    def __new__(cls, value):
+        value = value % 255
+        self = int.__new__(cls, value)
+        return self
+
+</code></pre>
+</section>
+
+<section class="slide">
+<h2>Exercise</h2>
+<p>Our ConstrainedInt handles initialization for us, but doesn't handle modification of the value</p>
+<p>Develop ConstrainedInt until it passes all tests in test_constrainedint.py
+<pre><code>
+class ConstrainedInt(int):
+    """keeps value between 0 and 255"""
+    def __new__(cls, value):
+        value = value % 255
+        self = int.__new__(cls, value)
+        return self
+</code></pre>
+
+</section>
+
+<section class="slide">
+    <h2>Mixins</h2>
+    <p>mixins are classes containing methods and properties with the intent of blending them into a new class definition.
+    <p>Implemented in Python via multiple inheritance
+  
+<pre><code>
+class BaseClass(object):
+    x = 10
+
+class Mixin1(object):
+    def method1(self):
+        print "called method1, x = %s" % self.x
+
+class Mixin2(object):
+    def method2(self):
+        print "called method2, x = %s" % self.x
+
+
+class MyClass(Mixin2, Mixin1, BaseClass):
+    pass
+</code></pre>
+    <p>Order is important, of course 
+
+    <ul>
+        <li>Methods you want to pull in are already defined.
+        <li>But in a non-trivial class hierarchy, be careful what you get </li>
+    </ul>
+
+</section>
+
+<section class="slide">
+    <h2>Multiple Inheritance and the Diamond Problem</h2>
+    <p>The order of inheritance affects the behavior of the class, so understanding method resolution order (MRO) is important</p>
+    <p>When calling a method on an object, Python first checks to see if the method name is defined in the class.  If not, it climbs up the class hierarchy until it either finds it or reaches the top without locating it, which will result in an AttributeError exception being thrown.</p>
+    <p>You can explicitly call the method as defined in a parent using super().</p>
+<pre>
+<code>
+class A(object): pass
+
+class B(A): pass
+
+class C(A): pass
+
+class D(B, C):
+    def meth(self, arg):
+        super(D, self).meth(arg)
+</code>
+</pre>
+    <img src="images/Diamond_inheritance.png" />
+
+</section>
+
+<section class="slide">
+    <h2>MRO</h2>
+    <p>The MRO of the previous diagram is [D,B,C,A], and is defined by the C3 linearization algorithm: <a target="_blank" href="http://en.wikipedia.org/wiki/C3_linearization">http://en.wikipedia.org/wiki/C3_linearization</a>
+    <p>Not so difficult for trivial examples, can lead to difficult bugs in complex hierarchies</p>
+    <p>classic classes maintain their original method resolution order, depth first and then left to right.</p>
+    <p>In C3, only the last occurance is retained</p>
+    <p>
+        <a target="_blank" href="http://www.python.org/download/releases/2.2.2/descrintro/#mro">http://www.python.org/download/releases/2.2.2/descrintro/#mro</a>, the classic description of modern MRO by Guido.
+    </p>
+    <p>
+        <a target="_blank" href="http://www.python.org/download/releases/2.3/mro/">http://www.python.org/download/releases/2.3/mro/</a>
+    </p>
+</section>
+
+<section class="slide">
+    <h2>Initialization</h2>
+    <p>An object is initialized after creation by the __init__ method.  It can accept arguments, which are passed to the class.</p>
+<pre>
+<code>
+from StringIO import StringIO
+class MyStringIO(StringIO):
+    def __init__(self, s):
+        super(MyStringIO, self).__init__(s)
+        self.write(s)
+</code>
+</pre>
+</section>
+
+<section class="slide">
+    <h2>Magic Methods</h2>
+    <p>They all start with and end with '__', and do things like support operators and comparisons, and provide handlers for the object lifecycle. </p>
+    <ul>
+        <li>__cmp__(self, other)
+        <li>__eq__(self, other)
+        <li>__add__(self, other)
+    </ul>
+    <p>Also, __call__, __str__, __repr__, __sizeof__, __setattr__, __getattr__, __len__, __iter__, __contains__, __lshift__, __rshift__, __xor__, __div__, __enter__, __exit__, and my personal favorite __rxor__(self,other)...... </p>
+    <p>The list is really long, it's mostly important to get a flavor of how they are used in Python so you can find and implement the right one when you need it.  See <a href="http://www.rafekettler.com/magicmethods.html">http://www.rafekettler.com/magicmethods.html</a> for more</p>
+</section>
+
+<section class="slide">
+    <h2>@classmethods</h2>
+    <p>Class methods receive the class as the first argument, not the instance.  This means it doesn't have access to instance variables.</p>
+<pre>
+<code>
+class MyClass(object):
+
+    @classmethod
+    def hello_class(cls):
+        print "hello from class %s" % str(cls)
+
+    def hello_instance(self):
+        print "hello from instance %s" % str(self)
+
+MyClass.hello_class()
+c = MyClass()
+c.hello_class()
+c.hello_instance()
+</code>
+</pre>
+
+</section>
+
+<section class="slide">
+    <h2>@properties</h2>
+    <p>A property is like a field with extra behavior defined behind the walls of the class</p>
+    <ul>
+        <li>Properties are generally read and written using getter and setter methods
+        <li>Useful for data validation and active updating, say storing a value in a database
+        <li>They require new-style classes!
+
+<pre>
+<code>
+class BankAccount(object):
+    def __init__(self, account_number):
+        # note that the actual field value is "hidden"
+        self._balance = 0.0
+        self.account_number = account_number
+
+    @property
+    def balance(self):
+        """getter"""
+        return self._balance
+
+    @balance.setter
+    def balance(self, value):
+        # record this transaction
+        print "set the value of account %(account_number)s to %(value)f" % \
+            {'account_number': self.account_number, 'value': value}
+        self._balance = value
+        
+</code>
+</pre>
+
+</section>
+
+<section class="slide">
+<h2>Overloading operators</h2>
+<p>The expression "a + b" is "just" a shorthand for add(a, b)
+<p>Or, if a is an object, for a.add(b)
+<p>But since people might actually want to use the name add, Python spells this method __add__
+</section>
+
+<section class="slide">
+<h2> Methods you can define in order to overload operators</h2>
+<ul>
+    <li>__lt__(self, other) Less than comparison; __le__, __ne__, and others are used for less than or equal, not equal, etc.
+    <li>__call__(self, ...args...)  Called for obj(3, "lithium")
+    <li>__len__(self)   Object "length"
+    <li>__getitem__(self, key)  Called for obj[3.14]
+    <li>__setitem__(self, key, value)   Called for obj[3.14] = 2.17
+    <li>__contains__    Called for "lithium" in obj
+    <li>__add__ Called for obj + value; use __mul__ for obj * value, etc.
+    <li>__int__ Called for int(obj); use __float__ and others to convert to other types
+</ul>
+
+<section class="slide">
+<h2>Commutativity </h2>
+<p>2 + x does not always equal x + 2
+
+<p>Classes can define right-hand versions of operators, e.g., __radd__ instead of __add__
+<p>If the object on the left has an __add__ method, call that
+<p>Otherwise, if the object on the right has an __radd__ method, call that
+<p>Otherwise, try Python's built-ins
+</section>
+
+
+</section>
+
+<section class="slide">
+<h2>Things you can not override</h2>
+<ul>
+<li> Assignment - it modifies the namespace, not the object
+<li> Type checks
+<li> Identity comparison with the 'is' operator
+<li> and, or, not - all use the truth-value test 
+<li> Method calls - getattr followed by call
+</ul>
+</section>
+
+<section class="slide">
+</section>
+
+<section class="slide">
+<h2>handling missing attribute access with __getattr__</h2>
+<p>If an object is asked about an attribute which can't be found through the usual means, __getattr__(self, name) is called
+<p>By default, __getattr__ will raise an AttributeError
+<p>There is also __setattr__(self, name, value).   What is its' default behavior?
+<p>Create a class which returns None for any attributes which haven't been defined
+<p>There is also __getattribute__ which gets called unconditionally.
+<pre><code>
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>__slots__</h2>
+    <p>Omits __dict__ for instances
+    <p>Reduces memory use
+    <p>Allows for immutable classes
+<pre><code>
+class TinyAndImmutable(object):
+    __slots__ = ['value']
+    def __init__(self, value):
+        self.value = 1
+
+x = TinyAndImmutable(4)
+
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Lab work, enhance the BankAccount class</h2>
+    <p>
+        <ol>
+            <li>Add constraint to keep balance greater than or equal to 0.
+            <li>Add a deposit method.  
+            <li>Add a withdraw method.  
+            <li>Add a transfer method.  
+            <li>Add the magic methods __str__, __eq__, and __add__.  Extra credit for __rxor__.
+            <li>Create a new subclass, CheckingAccount.   Add a new method write_check() which uses methods defined in the parent class.
+            <li>Import the decorators we played with and integrate them into your new class
+        </ol>
+    </p>
+</section>
+
+<section class="slide">
+    <h1>Coroutines</h1>
+</section>
+
+<section class="slide">
+    <h2>First, a quick review of generators</h2>
+    <p>A generator is a function which contains call(s) to the keyword yield.   
+    <p>When this is hit in a function definition, an iterator object is returned, which has the required definitions for __iter__ and next()
+<pre>
+<code>
+def count_to_N(N):
+    for i in xrange(N):
+        yield i+1
+
+print sum(count_to_N(100))
+</code>
+</pre>
+
+</section>
+
+<section class="slide">
+    <h2>Coroutines</h2>
+    <p>A coroutine is the generalization of a subroutine.  
+    <p>In a subroutine, data enters the top, and is returned transformed. 
+    <p>In a coroutine, multiple entry and points may exist
+
+    
+</section>
+
+<section class="slide">
+    <h2>Coroutines in Python</h2>
+    <p>We've seen yield
+    <a target="_blank" href="http://www.python.org/dev/peps/pep-0342/">http://www.python.org/dev/peps/pep-0342/</a>
+</section>
+
+<section class="slide">
+    <h2>With send(), a generator becomes a coroutine</h2>
+
+<p><pre><code>
+def coroutine(n):
+    try:
+        while True:
+            x = (yield)
+            print n+x
+    except GeneratorExit:
+        pass
+
+targets = [
+ coroutine(10),
+ coroutine(20),
+ coroutine(30),
+]
+
+for target in targets:
+    target.next()
+
+for i in range(5):
+    for target in targets:
+        target.send(i)
+</code></pre></p>
+<p>
+    <a href="http://dabeaz.com/coroutines/Coroutines.pdf">http://dabeaz.com/coroutines/Coroutines.pdf</a>
+</p>
+</section>
+
+
+<section class="slide">
+    <h1>Questions?</h1>
+</section>
+
+<!-- End slides. -->
+
+<!-- Begin extension snippets. Add or remove as needed. -->
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+<!-- End extension snippets. -->
+
+
+<!-- Required JS files. -->
+<script src="jquery-1.7.2.min.js"></script>
+<script src="core/deck.core.js"></script>
+
+<!-- Extension JS files. Add or remove as needed. -->
+<script src="core/deck.core.js"></script>
+<script src="extensions/hash/deck.hash.js"></script>
+<script src="extensions/menu/deck.menu.js"></script>
+<script src="extensions/goto/deck.goto.js"></script>
+<script src="extensions/status/deck.status.js"></script>
+<script src="extensions/navigation/deck.navigation.js"></script>
+<script src="extensions/scale/deck.scale.js"></script>
+
+<!-- Initialize the deck. You can put this in an external file if desired. -->
+<script>
+	$(function() {
+		$.deck('.slide');
+	});
+</script>
+</body>
+</html>
