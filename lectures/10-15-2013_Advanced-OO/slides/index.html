@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=1024, user-scalable=no">
 
-	<title>Isilon Advanced Python Week 5 : Advanced OO</title>
+	<title>Isilon System Development with Python, Week 5 : Advanced OO</title>
 	
 	<!-- Required stylesheet -->
 	<link rel="stylesheet" href="core/deck.core.css">
@@ -49,26 +49,109 @@
 <section class="slide">
 	<h2>Today's topics</h2>
     <ul>
-<!--
-        <li>Review of @decorators</li>
-        <li>Review of debugging</li>
--->
+        <li>Coroutines</li>
         <li>Python class styles</li>
         <li>Inheritance</li>
         <li>Multiple inheritance and the Diamond Problem
         <li>__init__ and super()
-        <li>Properties</li>
-        <li>metaclasses</li>
+        <li>Metaclasses</li>
     </ul>
 
 </section>
+
+<section class="slide">
+    <h1>Coroutines</h1>
+</section>
+
+<section class="slide">
+    <h2>Coroutines</h2>
+    <p>A coroutine is the generalization of a subroutine.  
+    <p>In a subroutine, data enters the top, and is returned transformed. 
+    <p>In a coroutine, multiple entry and points may exist
+    
+</section>
+
+<section class="slide">
+    <h2>First, a quick review of generators</h2>
+    <p>A generator is a function which contains call(s) to the keyword yield.   
+    <p>When this is hit in a function definition, an iterator object is returned, which has the required definitions for __iter__ and next()
+<pre>
+<code>
+def count_to_N(N):
+    for i in xrange(N):
+        yield i+1
+
+print sum(count_to_N(100))
+</code>
+</pre>
+</section>
+
+<section class="slide">
+    <h2>Coroutines in Python</h2>
+    <p>yield can output values, but it can also take in values 
+    <p>Via the generator method send()
+    <p>If a yield statement is on the right-hand side of an assignment (known as a yield expression), it will return the value it was sent:
+<code>x = yield 99</code>
+    <p>Before you can communicate with a coroutine you must first call
+    next() or send(None) to advance its execution to the first yield
+    expression, else you'll get a nice TypeError
+    <p>Other methods of the generator in addition to the iterator methods are 
+    <ul>
+        <li><code>close()</code> - causes the generator to throw StopIteration on next next() call
+        <li><code>throw(type, value, traceback)</code> - causes the specified exception to
+    be thrown at the point where the generator g is currently suspended
+    </ul>
+        
+    <p>
+    <a target="_blank" href="http://www.python.org/dev/peps/pep-0342/">http://www.python.org/dev/peps/pep-0342/</a>
+    <br />
+    <a target="_blank" href="http://scipy-lectures.github.io/advanced/advanced_python/#bidirectional-communication">http://scipy-lectures.github.io/advanced/advanced_python/#bidirectional-communication</a>
+</section>
+
+<section class="slide">
+    <h2>With send(), a generator becomes a coroutine</h2>
+
+<p><pre><code>
+def coroutine(n):
+    try:
+        while True:
+            x = (yield n)
+            n += x
+    except GeneratorExit:
+        pass
+
+targets = [
+ coroutine(10),
+ coroutine(20),
+ coroutine(30),
+]
+
+for target in targets:
+    print target.next()
+
+for i in range(5):
+    for target in targets:
+        print target.send(i)
+</code></pre></p>
+<p>
+    <a href="http://dabeaz.com/coroutines/Coroutines.pdf">http://dabeaz.com/coroutines/Coroutines.pdf</a>
+</p>
+</section>
+
+<section class="slide">
+    <h2>Exercise</h2>
+    <p>cd to examples/coroutines
+    <p>try running <code>python downloader.py |less</code>
+    <p>Using the generator tools we have discussed, cause the generator to exit when it reaches the word "DOCTYPE", without
+    putting this logic in the generator itself.
+</section>
+
 
 <section class="slide">
     <h2>Object Oriented programming in Python</h2>
     <p>Object Oriented Programming (OOP) is a programming paradigm which encapsulates data and functions together in the form of objects</p> 
     <ul>
         <li>Old and new style classes</li>
-        <li>Interfaces</li>
         <li>Multiple inheritance</li>
         <li>@classmethods</li>
         <li>object</li>
@@ -99,10 +182,16 @@ class C(object):
 
 </code>
 </pre>
+    <p>You almost always want new-style classes.  
+    <p>super(), for instance, doesn't work with old-style classes.  
+</section>
 
-<p>Now look for yourself the differences between new-style and old-style classes by
+<section class="slide">
+<h2>A closer look</h2>
+
+<p>Now look for yourself the differences between new-style and old-style classes:
 <ul>
-    <li>defining a class of each type
+    <li>define a class of each type
     <li>instantiate each class
     <li>run dir(instance) to see the attributes of each object
 </ul>
@@ -122,131 +211,7 @@ class C(object):
     <p>Class definition is stored in __class__
     <p>Class attributes are accessible through the instance
     <p>Reference counting, weak references, and cyclic garbage collection are handled for you
-    <p>You almost always want new-style classes.  
-    <p>super(), for instance, doesn't work with old-style classes.  
 </section>
-
-<section class="slide">
-    <h2>since a class is just an object, what is its' class?</h2>
-</section>
-
-<section class="slide">
-    <h2>New Style</h2>
-    <p>The class of Class is a metaclass
-    <p>a metaclass can be used to dynamically create a class
-    <p>the metaclass, being a class, has a metaclass
-    <p>The base metaclass is type
-</section>
-
-<section class="slide">
-    <h2>type</h2>
-    <p>
-<pre>
-type?
-Type:       type
-String Form:<type 'type'>
-Namespace:  Python builtin
-Docstring:
-type(object) -> the object's type
-type(name, bases, dict) -> a new type
-</pre>
-
-<p class="slide"> Hold on...
-<pre>
-type(type)
-Out[1]: type
-</pre>
-</p>
-    
-</section>
-
-<section class="slide">
-    <h2>type magic</h2>
-    <p>With one argument, type() returns the type of the argument
-    <p>With 3 arguments, type() returns a new class
-<pre>
-  type(name of the class,
- 
-       tuple of the parent class (for inheritance, can be empty),
- 
-       dictionary containing attributes names and values)
-</pre>
-
-</section>
-
-<section class="slide">
-<h2>using type() to build a class</h2>
-<p>using the class keyword is more syntactic sugar, we can get by without it
-<pre><code>
-class MyClass(object):
-    x = 1
-</code></pre>
-<p>OR
-<p>
-<pre><code>
-MyClass = type('MyClass', (), {'x': 1})
-</code></pre>
-
-</section>
-
-<section class="slide">
-<h2>adding methods to a class built with type()</h2>
-<p>Just define a function with the correct signature and add it to the attr dictionary
-<pre><code>
-def my_method(self):
-    print "called my_method, x = %s" % self.x
-
-MyClass = type('MyClass',(), {'x': 1, 'my_method': my_method})
-o = MyClass()
-o.my_method()
-</code></pre>
-</section>
-
-<section class="slide">
-    <h2>Metaclass example</h2>
-<p>Consider wanting a metaclass which mangles all attribute names</p>
-<pre>
-jk
-</section>
-
-
-<section class="slide">
-    <h2>__new__, the object constructor</h2>
-    <p>Unlike __init__, __new__ is a static method, not an instance method
-    <p>For historical reasons, this is a static method instead of a class method
-    <p>Called with the same arguments as __init__
-    <p>Allows for immutable types, data is set at construction time
-    <p>Can return new or existing objects, of any type
-    <p>__init__ is still called once the object is stood up to initialize it
-</section>
-
-<section class="slide">
-    <h2>__new__ example</h2>
-<pre><code>
-class ContrainedInt(int):
-    def __new__(cls, value):
-        value = value % 255
-        self = int.__new__(cls, value)
-        return self
-
-</code></pre>
-</section>
-
-<section class="slide">
-<h2>Exercise</h2>
-<p>Our ConstrainedInt handles initialization for us, but doesn't handle modification of the value</p>
-<p>Develop ConstrainedInt until it passes all tests in test_constrainedint.py
-<pre><code>
-class ConstrainedInt(int):
-    """keeps value between 0 and 255"""
-    def __new__(cls, value):
-        value = value % 255
-        self = int.__new__(cls, value)
-        return self
-</code></pre>
-
-</section>
-
 <section class="slide">
     <h2>Mixins</h2>
     <p>mixins are classes containing methods and properties with the intent of blending them into a new class definition.
@@ -318,14 +283,51 @@ class D(B, C):
     <p>An object is initialized after creation by the __init__ method.  It can accept arguments, which are passed to the class.</p>
 <pre>
 <code>
-from StringIO import StringIO
-class MyStringIO(StringIO):
-    def __init__(self, s):
-        super(MyStringIO, self).__init__(s)
-        self.write(s)
+class MyInt(int):
+    def __init__(self, d):
+        super(MyInt, self).__init__(d)
 </code>
 </pre>
 </section>
+
+<section class="slide">
+    <h2>__new__, the object constructor</h2>
+    <p>Unlike __init__, __new__ is a static method, not an instance method
+    <p>For historical reasons, this is a static method instead of a class method
+    <p>Called with the same arguments as __init__
+    <p>Allows for immutable types, data is set at construction time
+    <p>Can return new or existing objects, of any type
+    <p>__init__ is still called once the object is stood up to initialize it
+</section>
+
+<section class="slide">
+    <h2>__new__ example</h2>
+<p>Here is a replacement for int which can only take new values between 0 and 255:
+<pre><code>
+class ConstrainedInt(int):
+    def __new__(cls, value):
+        value = value % 256
+        self = int.__new__(cls, value)
+        return self
+
+</code></pre>
+</section>
+
+<section class="slide">
+<h2>Exercise</h2>
+<p>Our ConstrainedInt handles initialization for us, but doesn't handle modification of the value</p>
+<p>Develop ConstrainedInt until it passes all tests in test_constrainedint.py
+<pre><code>
+class ConstrainedInt(int):
+    """keeps value between 0 and 255"""
+    def __new__(cls, value):
+        value = value % 255
+        self = int.__new__(cls, value)
+        return self
+</code></pre>
+
+</section>
+
 
 <section class="slide">
     <h2>Magic Methods</h2>
@@ -414,7 +416,7 @@ class BankAccount(object):
     <li>__add__ Called for obj + value; use __mul__ for obj * value, etc.
     <li>__int__ Called for int(obj); use __float__ and others to convert to other types
 </ul>
-
+</section>
 <section class="slide">
 <h2>Commutativity </h2>
 <p>2 + x does not always equal x + 2
@@ -434,22 +436,32 @@ class BankAccount(object):
 <li> Assignment - it modifies the namespace, not the object
 <li> Type checks
 <li> Identity comparison with the 'is' operator
-<li> and, or, not - all use the truth-value test 
+<li> and, or, not - all use the truth-value test ( <a target="_blank" href="http://docs.python.org/2.4/lib/truth.html">http://docs.python.org/2.4/lib/truth.html</a> )
+<!--
 <li> Method calls - getattr followed by call
+-->
 </ul>
 </section>
 
-<section class="slide">
-</section>
 
 <section class="slide">
 <h2>handling missing attribute access with __getattr__</h2>
 <p>If an object is asked about an attribute which can't be found through the usual means, __getattr__(self, name) is called
 <p>By default, __getattr__ will raise an AttributeError
 <p>There is also __setattr__(self, name, value).   What is its' default behavior?
-<p>Create a class which returns None for any attributes which haven't been defined
+<!--
 <p>There is also __getattribute__ which gets called unconditionally.
 <pre><code>
+</code></pre>
+-->
+</section>
+
+<section class="slide">
+    <h2>__getattr__ Exercise</h2>
+    <p>Create a class which returns None for any attributes which haven't been defined
+<pre><code>
+f = Foo()
+assert None==f.x
 </code></pre>
 </section>
 
@@ -470,6 +482,129 @@ x = TinyAndImmutable(4)
 </section>
 
 <section class="slide">
+    <h2>since a class is just an object, what is its' class?</h2>
+</section>
+
+<section class="slide">
+    <h2>New Style</h2>
+    <p>The class of Class is a metaclass
+    <p>a metaclass can be used to dynamically create a class
+    <p>the metaclass, being a class, has a metaclass
+    <p>The base metaclass is type
+</section>
+
+<section class="slide">
+    <h2>type</h2>
+    <p>
+<pre>
+type?
+Type:       type
+String Form:<type 'type'>
+Namespace:  Python builtin
+Docstring:
+type(object) -> the object's type
+type(name, bases, dict) -> a new type
+</pre>
+
+<p class="slide"> So what type is type?
+</p>
+<p class="slide"> Hold on...
+</p>
+<pre class="slide">
+type(type)
+Out[1]: type
+</pre>
+</p>
+    
+</section>
+
+<section class="slide">
+    <h2>type magic</h2>
+    <p>With one argument, type() returns the type of the argument
+    <p>With 3 arguments, type() returns a new class
+<pre>
+  type(name of the class,
+ 
+       tuple of the parent class (for inheritance, can be empty),
+ 
+       dictionary containing attributes names and values)
+</pre>
+
+</section>
+
+<section class="slide">
+<h2>using type() to build a class</h2>
+<p>using the class keyword is more syntactic sugar, we can get by without it
+<pre><code>
+class MyClass(object):
+    x = 1
+</code></pre>
+<p>OR
+<p>
+<pre><code>
+MyClass = type('MyClass', (), {'x': 1})
+</code></pre>
+
+</section>
+
+<section class="slide">
+<h2>adding methods to a class built with type()</h2>
+<p>Just define a function with the correct signature and add it to the attr dictionary
+<pre><code>
+def my_method(self):
+    print "called my_method, x = %s" % self.x
+
+MyClass = type('MyClass',(), {'x': 1, 'my_method': my_method})
+o = MyClass()
+o.my_method()
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Metaclass example</h2>
+<p>Consider wanting a metaclass which mangles all attribute names to provide uppercase and lower case attributes</p>
+</section>
+
+<section class="slide">
+<h2>Metaclass example</h2>
+<p>
+<pre><code>
+class Foo(object):
+    __metaclass__ = NameMangler
+    x = 1
+
+f = Foo()
+print f.X
+print f.x
+
+</code></pre>
+</section>
+
+<section class="slide">
+<h2>NameMangler</h2>
+<pre><code>
+class NameMangler(type):
+
+    def __new__(cls, clsname, bases, dct):
+
+        uppercase_attr = {}
+        for name, val in dct.items():
+            if not name.startswith('__'):
+                uppercase_attr[name.upper()] = val
+                uppercase_attr[name] = val
+            else:
+                uppercase_attr[name] = val
+
+        return super(NameMangler, cls).__new__(cls, clsname, bases, uppercase_attr)
+
+class Foo(object):
+    __metaclass__ = NameMangler
+    x = 1
+</code></pre>
+</section>
+
+
+<section class="slide">
     <h2>Lab work, enhance the BankAccount class</h2>
     <p>
         <ol>
@@ -483,72 +618,6 @@ x = TinyAndImmutable(4)
         </ol>
     </p>
 </section>
-
-<section class="slide">
-    <h1>Coroutines</h1>
-</section>
-
-<section class="slide">
-    <h2>First, a quick review of generators</h2>
-    <p>A generator is a function which contains call(s) to the keyword yield.   
-    <p>When this is hit in a function definition, an iterator object is returned, which has the required definitions for __iter__ and next()
-<pre>
-<code>
-def count_to_N(N):
-    for i in xrange(N):
-        yield i+1
-
-print sum(count_to_N(100))
-</code>
-</pre>
-
-</section>
-
-<section class="slide">
-    <h2>Coroutines</h2>
-    <p>A coroutine is the generalization of a subroutine.  
-    <p>In a subroutine, data enters the top, and is returned transformed. 
-    <p>In a coroutine, multiple entry and points may exist
-
-    
-</section>
-
-<section class="slide">
-    <h2>Coroutines in Python</h2>
-    <p>We've seen yield
-    <a target="_blank" href="http://www.python.org/dev/peps/pep-0342/">http://www.python.org/dev/peps/pep-0342/</a>
-</section>
-
-<section class="slide">
-    <h2>With send(), a generator becomes a coroutine</h2>
-
-<p><pre><code>
-def coroutine(n):
-    try:
-        while True:
-            x = (yield)
-            print n+x
-    except GeneratorExit:
-        pass
-
-targets = [
- coroutine(10),
- coroutine(20),
- coroutine(30),
-]
-
-for target in targets:
-    target.next()
-
-for i in range(5):
-    for target in targets:
-        target.send(i)
-</code></pre></p>
-<p>
-    <a href="http://dabeaz.com/coroutines/Coroutines.pdf">http://dabeaz.com/coroutines/Coroutines.pdf</a>
-</p>
-</section>
-
 
 <section class="slide">
     <h1>Questions?</h1>
