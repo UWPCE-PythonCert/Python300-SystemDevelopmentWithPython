@@ -109,6 +109,26 @@ def add(x, y):
 </section>
 
 <section class="slide">
+    <h2>and of course, there other options</h2>
+    <p>Distutils isn't the only package for packaging, there is also setuptools, distribute, and distutils2</p>
+    <ul>
+        <li><a target="_blank" href="http://docs.python.org/2/distutils/introduction.html">http://docs.python.org/2/distutils/introduction.html</a>
+        <li><a target="_blank" href="https://pypi.python.org/pypi/Distutils2">https://pypi.python.org/pypi/Distutils2</a> (the future)
+        <li><a target="_blank" href="https://bitbucket.org/pypa/setuptools">https://bitbucket.org/pypa/setuptools</a> (deprecated)
+        <li><a target="_blank" href="https://pypi.python.org/pypi/distribute">https://pypi.python.org/pypi/distribute</a> (A fork of setuptools.  As of August 2013, it was merged back to setuptools and discontinued)
+    </ul>
+    <p>distutils is the standard, works well until you need it to get complicated.   Then look at distutils2.
+    <img src="images/state_of_packaging.jpg" />
+
+    <h3>Further reading</h3>
+    <ul>
+    <li><a target="_blank" href="http://stackoverflow.com/a/6522905/958118">http://stackoverflow.com/a/6522905/958118</a>
+    <li><a target="_blank" href="http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/">http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/</a>
+    <li><a target="_blank" href="http://guide.python-distribute.org/introduction.html#current-state-of-packaging">http://guide.python-distribute.org/introduction.html#current-state-of-packaging</a>
+    </ul>
+</section>
+
+<section class="slide">
     <h2>Packaging with Distutils</h2>
         <p>write a setup.py script
 <pre><code>
@@ -130,26 +150,9 @@ setup(
 </pre>
 </ul>
     <p>Now your package is wrapped up in dist/, ready to distribute</p>
-</section>
-
-<section class="slide">
-    <h2>and of course, there other options</h2>
-    <p>Distutils isn't the only package for packaging, there is also setuptools, distribute, and distutils2</p>
-    <ul>
-        <li><a target="_blank" href="http://docs.python.org/2/distutils/introduction.html">http://docs.python.org/2/distutils/introduction.html</a>
-        <li><a target="_blank" href="https://pypi.python.org/pypi/Distutils2">https://pypi.python.org/pypi/Distutils2</a> (the future)
-        <li><a target="_blank" href="https://bitbucket.org/pypa/setuptools">https://bitbucket.org/pypa/setuptools</a> (deprecated)
-        <li><a target="_blank" href="https://pypi.python.org/pypi/distribute">https://pypi.python.org/pypi/distribute</a> (A fork of setuptools.  As of August 2013, it was merged back to setuptools and discontinued)
-    </ul>
-    <p>distutils is the standard, works well until you need it to get complicated.   Then look at distutils2.
-    <img src="images/state_of_packaging.jpg" />
-
-    <h3>Further reading</h3>
-    <ul>
-    <li><a target="_blank" href="http://stackoverflow.com/a/6522905/958118">http://stackoverflow.com/a/6522905/958118</a>
-    <li><a target="_blank" href="http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/">http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/</a>
-    <li><a target="_blank" href="http://guide.python-distribute.org/introduction.html#current-state-of-packaging">http://guide.python-distribute.org/introduction.html#current-state-of-packaging</a>
-    </ul>
+    <p>Your package can be submitted to PyPI via <code>python setup.py upload</code>
+    <p><a target="_blank" href="https://pypi.python.org/pypi">https://pypi.python.org/pypi</a>
+    <p>pip finds packages via PyPI
 </section>
 
 <section class="slide">
@@ -176,7 +179,7 @@ setup(
 
 <section class="slide">
     <h2>Example code used today</h2>
-    <p>To keep focus on the integration tools, we're going to focus on integrating the following the add() function into our Python application</p>
+    <p>To keep focus on the integration tools, we're going to focus on integrating the following add() function into our Python application</p>
 <pre><code>
 #include &lt;stdio.h&gt;
 
@@ -212,7 +215,7 @@ int main(void) {
     <ul>
         <li>Good for integrating with C library functions and system calls
         <li>The API isn't trivial to learn
-        <li>Lots of opporunity for error, you must do manual reference counting
+        <li>Lots of opporunity for error, you must do manual reference counting (<a target="_blank" href="http://docs.python.org/2/c-api/refcounting.html">http://docs.python.org/2/c-api/refcounting.html</a>)
     </ul>
     <p>Further reading</p>
     <ul>
@@ -265,6 +268,7 @@ static PyMethodDef AddMethods[] = {
 PyImport_AddModule("add");
 Py_InitModule("add", AddMethods);
 </code></pre>
+    <p><a target="_blank" href="http://docs.python.org/2/c-api/structures.html#PyMethodDef">http://docs.python.org/2/c-api/structures.html#PyMethodDef</a>
     <p>Now you're ready to initialize the Python environment with
 <pre><code>
 Py_SetProgramName(char *name)
@@ -275,7 +279,7 @@ Py_Initialize()
 <section class="slide">
 <h2>Our add method, ready to import in Python</h2>
 <pre><code>
-#include <Python.h>
+#include &lt;Python.h&gt;
 
 static PyObject *
 add(PyObject *self, PyObject *args)
@@ -323,10 +327,29 @@ int main(int argc, char *argv[]) {
     <p>Simple compilation details are handled by distutils
     <p>
 <pre><code>
-python setup.py build
+python setup.py build_ext --inplace
 </code></pre>
+<!--
     <p>Now you can changedir to build/(arch-dependent-directory)/ and "import add; add.add(2,4)" from your Python code
+-->
+    <p>Now you can "import add; add.add(2,4)" from your Python code
 
+</section>
+
+<section class="slide">
+
+    <h2>Exception handling</h2>
+    <p>It works somewhat like the Unix errno variable: there is a global indicator (per thread) of the last error that occurred. Most functions don’t clear this on success, but will set it to indicate the cause of the error on failure. Most functions also return an error indicator, usually NULL if they are supposed to return a pointer, or -1 if they return an integer (exception: the PyArg_*() functions return 1 for success and 0 for failure).
+    <p>The easy way to set this indicator is with PyErr_SetString
+    <p><a target="_blank" href="http://docs.python.org/2/c-api/exceptions.html">http://docs.python.org/2/c-api/exceptions.html</a>
+</section>
+
+<section class="slide">
+    <h2>Exercise</h2>
+    <p>Find the divide module in the examples/c-api directory
+    <p>What happens when you call divide.divide(1/0)?
+    <p>This is a different result than a pure Python 1/0, which throws an exception
+    <p>Change the divide method to throw an appropriate exception in the divide-by-zero case
 </section>
 
 <section class="slide">
