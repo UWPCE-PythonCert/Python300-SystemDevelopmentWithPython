@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
 </section>
 
 <section class="slide">
-    <h2>add / C-API
+    <h2>add / C-API</h2>
     <p>Now let's build our module with distutils
     <p>Simple compilation details are handled by distutils
     <p>
@@ -372,7 +372,6 @@ python setup.py build
 <a target="_blank" href="http://www.swig.org/Doc2.0/SWIGDocumentation.html#Introduction_nn5">http://www.swig.org/Doc2.0/SWIGDocumentation.html#Introduction_nn5</a>
 </section>
 
-
 <section class="slide">
     <h2>SWIGifying add(), not just for Python</h2>
     <p>SWIG will create interfaces for all supported languages</p>
@@ -391,7 +390,8 @@ python setup.py build
 
 <section class="slide">
     <h2>ctypes</h2>
-    <p>A foreign function interface in Python</p>
+    <p>A foreign function interface in Python
+    <p>binds functions in shared libraries to Python functions
     <h3>Benefits</h3>
     <ul>
         <li>Ships with Python, since 2.5
@@ -410,6 +410,28 @@ print add.add(3,4)
     <ul>
         <li><a target="_blank" href="http://docs.python.org/2/library/ctypes.html">http://docs.python.org/2/library/ctypes.html</a>
     </ul>
+</section>
+<section class="slide">
+    <h2>Calling functions with ctypes</h2>
+    <p>None, integers, longs, byte strings and unicode strings are the only native Python objects that can directly be used as parameters in these function calls.
+    <p>The rest must be wrapped in a ctypes data type
+    <p>For instance, floats can be wrapped in c_double() before handing off to ctypes
+<pre><code>
+printf("An int %d, a double %f\n", 1234, c_double(3.14))
+</code></pre>
+<p>You can allow your own classes to be passed to ctypes via the _as_parameter_ instance variable, as long as they can be resolved to an integer or string.
+<pre><code>
+class MyObject(object):
+    def __init__(self, number):
+        self._as_parameter_ = number
+
+obj = MyObject(32)
+printf("object value: %d\n", obj)
+
+</code></pre>
+<p>
+    <a target="_blank" href="http://docs.python.org/2/library/ctypes.html#fundamental-data-types">http://docs.python.org/2/library/ctypes.html#fundamental-data-types</a>
+</p>
 </section>
 
 
@@ -430,6 +452,33 @@ def add(int x, int y):
         <li><a target="_blank" href="http://www.cython.org/">http://www.cython.org/</a>
         <li><a target="_blank" href="http://docs.cython.org/">http://docs.cython.org/</a>
     </ul>
+
+</section>
+
+<section class="slide">
+    <h2>developing with Cython</h2>
+    <p>first, install cython with "pip install cython"</p>
+    <p>Cython files end in the .pyx extension
+    <p>Cython functions can be declared two ways:
+        <ul>
+        <li>def foo  # callable from Python
+        <li>cdef foo  # only callable from Cython/C
+        </ul>
+    <p>Once your .pyx file is created, it is converted to C via
+<pre><code>
+cython cy_add.pyx
+</code></pre>
+
+    <p>Generate "annoted" C code in HTML
+<pre><code>
+cython -a cy_add.pyx
+</code></pre>
+    <p>To build your Python extension:
+<pre><code>
+python cy_setup.py build_ext --inplace # note Cython defines its' own build_ext in Cython.Distutils.build_ext
+</code></pre>
+    
+
 
 </section>
 
