@@ -93,7 +93,9 @@ def add(x, y):
     <p>It has been around for a long time, and is at the core of present day packaging
     <p>Distutils is missing a few things
 <ul>
+<!--
     <li>package versioning
+-->
     <li>package discovery
     <li>auto-install 
 </ul>
@@ -127,7 +129,7 @@ setup(
 <code>python setup.py sdist</code>
 </pre>
 </ul>
-    <p>Now your package is wrapped up in build/, ready to distribute</p>
+    <p>Now your package is wrapped up in dist/, ready to distribute</p>
 </section>
 
 <section class="slide">
@@ -135,16 +137,26 @@ setup(
     <p>Distutils isn't the only package for packaging, there is also setuptools, distribute, and distutils2</p>
     <ul>
         <li><a target="_blank" href="http://docs.python.org/2/distutils/introduction.html">http://docs.python.org/2/distutils/introduction.html</a>
-        <li><a target="_blank" href="http://peak.telecommunity.com/DevCenter/setuptools">http://peak.telecommunity.com/DevCenter/setuptools</a>
-        <li><a target="_blank" href="https://pypi.python.org/pypi/distribute">https://pypi.python.org/pypi/distribute</a>
+        <li><a target="_blank" href="https://pypi.python.org/pypi/Distutils2">https://pypi.python.org/pypi/Distutils2</a> (the future)
+        <li><a target="_blank" href="https://bitbucket.org/pypa/setuptools">https://bitbucket.org/pypa/setuptools</a> (deprecated)
+        <li><a target="_blank" href="https://pypi.python.org/pypi/distribute">https://pypi.python.org/pypi/distribute</a> (A fork of setuptools.  As of August 2013, it was merged back to setuptools and discontinued)
     </ul>
-    <p>distutils is the standard, works well until you need it to get complicated
+    <p>distutils is the standard, works well until you need it to get complicated.   Then look at distutils2.
+    <img src="images/state_of_packaging.jpg" />
+
     <h3>Further reading</h3>
     <ul>
     <li><a target="_blank" href="http://stackoverflow.com/a/6522905/958118">http://stackoverflow.com/a/6522905/958118</a>
+    <li><a target="_blank" href="http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/">http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/</a>
+    <li><a target="_blank" href="http://guide.python-distribute.org/introduction.html#current-state-of-packaging">http://guide.python-distribute.org/introduction.html#current-state-of-packaging</a>
     </ul>
 </section>
 
+<section class="slide">
+    <h2>Packaging, what a mess. Or is it a rich, healthy ecosystem?  Anyway, it's evolving.</h2>
+</section>
+
+<!--
 <section class="slide">
     <h2>Virtualenv</h2>
     <p>Creates isolated Python environments, with just the packages and versions you want, independent of system-wide installation
@@ -159,6 +171,7 @@ setup(
         <li><a target="_blank" href="https://pypi.python.org/pypi/virtualenv">https://pypi.python.org/pypi/virtualenv</a>
     </ul>
 </section>
+-->
 
 <section class="slide">
     <h2>Example code used today</h2>
@@ -198,13 +211,121 @@ int main(void) {
     <ul>
         <li>Good for integrating with C library functions and system calls
         <li>The API isn't trivial to learn
-        <li>Lots of opporunity for error, manual reference counting
+        <li>Lots of opporunity for error, you must do manual reference counting
     </ul>
     <p>Further reading</p>
     <ul>
         <li><a target="_blank" href="http://docs.python.org/2/extending/extending.html">http://docs.python.org/2/extending/extending.html</a>
         <li><a target="_blank" href="http://hg.python.org/cpython/file/2145593d108d">Python 2.7 source code</a>
     </ul>
+</section>
+
+<section class="slide">
+    <h2>Intro to the C API</h2>
+    <p>You'll need the Python dev package installed on your system
+
+    <p>Pull in the Python API to your C code via
+<pre><code>
+#include &lt;Python.h&gt;
+/*
+Note: Since Python may define some pre-processor definitions which affect the standard headers on some systems, you must include Python.h before any standard headers are included.
+
+stdio.h, string.h, errno.h, and stdlib.h are included for you.
+*/
+</code></pre>
+</section>
+<section class="slide">
+    <h2>Intro to the C API</h2>
+    <p>Function arguments must be parsed on the way in and the way out
+    <p>On the way in, we can call PyArg_ParseTuple
+<pre><code>
+if (!PyArg_ParseTuple(args, "s", &amp;var1, ...))
+    return NULL;
+</code></pre> 
+    <p><a target="_blank" href="http://docs.python.org/2/c-api/arg.html#PyArg_ParseTuple">http://docs.python.org/2/c-api/arg.html#PyArg_ParseTuple</a>
+
+    <p>On the way out, we can call Py_BuildValue
+<pre><code>
+PyObject* Py_BuildValue(const char *format, ...)
+</code></pre> 
+    <p><a target="_blank" href="http://docs.python.org/2/c-api/arg.html#Py_BuildValue">http://docs.python.org/2/c-api/arg.html#Py_BuildValue</a>
+
+
+</section>
+
+<section class="slide">
+    <h2>Registering your functions</h2>
+    <p>First, register the name and address of your function in the method table
+<pre><code>
+static PyMethodDef AddMethods[] = {
+    {"add", add, METH_VARARGS, "add two numbers"}, /* METH_VARARGS or META_VARARGS | METH_KEYWORDS */
+    {NULL, NULL, 0, NULL}
+};
+PyImport_AddModule("add");
+Py_InitModule("add", AddMethods);
+</code></pre>
+    <p>Now you're ready to initialize the Python environment with
+<pre><code>
+Py_SetProgramName(char *name)
+Py_Initialize()
+</code></pre>
+</section>
+
+<section class="slide">
+<h2>Our add method, ready to import in Python</h2>
+<pre><code>
+#include <Python.h>
+
+static PyObject *
+add(PyObject *self, PyObject *args)
+{
+    int x;
+    int y;
+    int sts;
+
+    if (!PyArg_ParseTuple(args, "ii", &amp;x, &amp;y))
+        return NULL;
+    sts = x+y;
+    return Py_BuildValue("i", sts);
+}
+
+// Module's method table and initialization function
+// See: http://docs.python.org/extending/extending.html#the-module-s-method-table-and-initialization-function
+static PyMethodDef AddMethods[] = {
+    {"add", add, METH_VARARGS, "add two numbers"},
+    {NULL, NULL, 0, NULL}
+};
+
+void initadd(void) {
+    // Module's initialization function
+    // Will be called again if you use Python's reload()
+
+    PyImport_AddModule("add");
+    Py_InitModule("add", AddMethods);
+}
+
+int main(int argc, char *argv[]) {
+    Py_SetProgramName(argv[0]);
+
+    Py_Initialize();
+
+    initadd();
+
+    return 0;
+}
+</code></pre>
+</section>
+
+<section class="slide">
+    <h2>add / C-API
+    <p>Now let's build our module with distutils
+    <p>Simple compilation details are handled by distutils
+    <p>
+<pre><code>
+python setup.py build
+</code></pre>
+    <p>Now you can changedir to build/(arch-dependent-directory)/ and "import add; add.add(2,4)" from your Python code
+
 </section>
 
 <section class="slide">
@@ -233,13 +354,22 @@ int main(void) {
 
 <section class="slide">
     <h2>SWIGifying add()</h2>
+    <p>SWIG doesn't require modification to your C source code
+    <p>The language interface is defined by an "interface file", usually with a suffix of .i
+    <p>From there, SWIG can generate interfaces for the languages it supports
+    <p>The interface file contains ANSI C prototypes and variable declarations
+    <p>The %module directive defines the name of the module that will be created by SWIG
+    <p>To create a SWIG wrapper:
+    <p>
     <ul>
-        <li>build add.i
+        <li>create add.i
         <li>create distutils setup.py
-        <li>python setup.py build_ext -i
+        <li>python setup.py build_ext --inplace
     </ul>
 <h4>run it!</h4>
 <pre><code>python -c 'import add;print add.add(4,5)'</code></pre>
+<p>
+<a target="_blank" href="http://www.swig.org/Doc2.0/SWIGDocumentation.html#Introduction_nn5">http://www.swig.org/Doc2.0/SWIGDocumentation.html#Introduction_nn5</a>
 </section>
 
 

@@ -3,7 +3,7 @@
 from distutils.core import setup, Extension
 
 setup(
-    name='test_add',
+    name='add',
     version='1.0',
     description='add test',
     author='Joseph Sheedy',
