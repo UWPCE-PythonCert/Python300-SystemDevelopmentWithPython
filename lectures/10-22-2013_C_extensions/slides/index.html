@@ -458,7 +458,16 @@ printf("object value: %d\n", obj)
 </p>
 </section>
 
-
+<section class="slide">
+    <h2>ctypes</h2>
+    <p>Passing Python objects into C functions
+    <p>If a function expects a pointer, just wrap your Python object in byref(x)
+    <p>
+    <a target="_blank" href="http://docs.python.org/2/library/ctypes.html#passing-pointers-or-passing-parameters-by-reference">http://docs.python.org/2/library/ctypes.html#passing-pointers-or-passing-parameters-by-reference</a>
+    <p>For callback functions, use a factory that returns function prototypes:  ctypes.CFUNCTYPE(restype, *argtypes, use_errno=False, use_last_error=False)
+    <p>
+<a target="_blank" href="http://docs.python.org/2/library/ctypes.html#ctypes.CFUNCTYPE">http://docs.python.org/2/library/ctypes.html#ctypes.CFUNCTYPE</a>
+</section>
 <section class="slide">
     <h2>Cython</h2>
     <p>A Python like language with static types which compiles down to Python extensions written in C</p>
