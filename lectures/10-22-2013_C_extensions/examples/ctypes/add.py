@@ -7,7 +7,8 @@ libc = CDLL("/usr/lib/libc.dylib")
 # libc = CDLL("libc.so")
 libc.printf("printed via libc printf()\n")
 
-libc.printf("An int %d, a double %f\n", 1234, c_double(3.14))
+libc.printf("An int %d, a double %f\n", 1234, 3.14)
+# libc.printf("An int %d, a double %f\n", 1234, c_double(3.14))
 
 # load the math library
 libm = CDLL("/usr/lib/libm.dylib")

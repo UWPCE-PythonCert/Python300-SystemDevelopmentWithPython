@@ -9,6 +9,10 @@ divide(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "dd", &x, &y))
         return NULL;
+    if (y == 0) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "DIVIDE BY ZERO ERROR");
+        return NULL;
+    }
     sts = x/y;
     return Py_BuildValue("d", sts);
 }

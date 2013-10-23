@@ -9,7 +9,7 @@ setup(
     author='Joseph Sheedy',
     author_email='joseph.sheedy@gmail.com',
     url='http://example.com/add_test',
-    packages=['test_add'],
+    # packages=['test_add'],
     py_modules=['add'],
     ext_modules=[
         Extension('_add', sources=['add.c', 'add.i'])
