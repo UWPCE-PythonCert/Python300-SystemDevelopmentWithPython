@@ -26,7 +26,7 @@ def threading_client(number_of_requests=10):
     
     # for i in xrange(number_of_requests):
         # thread = threading.Thread(target=worker, args=())
-    thread_count = 128 
+    thread_count = 4 
     pool = multiprocessing.Pool(thread_count)
     pool.map(worker, range(number_of_requests))
 

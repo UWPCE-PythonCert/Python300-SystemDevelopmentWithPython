@@ -16,7 +16,7 @@ from decorators.decorators import timer
 def threading_client(number_of_requests=10, thread_count=2):
     
     results = Queue.Queue()
-    url = "http://localhost:8000"
+    url = "http://localhost:8080"
 
     def worker(*args):
         # print "Thread %s started" % threading.current_thread().name
@@ -35,6 +35,6 @@ if __name__ == "__main__":
     # TODO: get number_of_requests and thread_count from
     # argparse
 
-    number_of_requests = 1000
+    number_of_requests = 100
     thread_count = 128
     threading_client(number_of_requests=number_of_requests, thread_count = thread_count)
