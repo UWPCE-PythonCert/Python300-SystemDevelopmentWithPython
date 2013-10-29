@@ -151,6 +151,16 @@ parser.add_argument('--output', type=argparse.FileType('wb', 0))
 </section>
 
 <section class="slide">
+    <h2>Exercise</h2>
+    <p>Create a script which:
+        <ul>
+            <li>reads stdin
+            <li>inserts the line number in from of each line 
+            <li>outputs to the file or stdout as specified on the command line via argparse
+        </ul>
+</section>
+
+<section class="slide">
     <h2>argparse: custom Actions</h2>
     <p>You may also do arbitrary handling by passing an object which subclasses argparse.Action with a definition of __call__(parser, namespace, values, option_string)
 <pre><code>
