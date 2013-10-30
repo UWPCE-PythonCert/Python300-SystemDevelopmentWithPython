@@ -36,5 +36,5 @@ if __name__ == "__main__":
     # argparse
 
     number_of_requests = 100
-    thread_count = 128
+    thread_count = 10
     threading_client(number_of_requests=number_of_requests, thread_count = thread_count)

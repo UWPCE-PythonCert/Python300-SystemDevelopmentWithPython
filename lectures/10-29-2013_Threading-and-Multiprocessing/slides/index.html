@@ -303,8 +303,7 @@ print args.func(*(args.x))
 
     <h3>Threads</h3>
     <p>Threads are lightweight processes, run in the address space of an OS process.
-    <p>Threads share the address space of the parent process.  This allows
-    access to data in the same scope.</p>
+    <p>This allows access to data in the same scope.</p>
     <p>Python threads are true OS level threads</p>
     <p>Threads can not gain the performance advantage of multiple processors due to the Global Interpreter Lock (GIL)</p>
     <p>But the GIL is released during IO, allowing IO bound processes to benefit from threading</p>
@@ -325,6 +324,7 @@ print args.func(*(args.x))
     <ul>
         <li><a target="_blank" href="http://wiki.python.org/moin/GlobalInterpreterLock">http://wiki.python.org/moin/GlobalInterpreterLock</a></li>
         <li><a target="_blank" href="http://docs.python.org/2/c-api/init.html#threads">http://docs.python.org/2/c-api/init.html#threads</a></li>
+        <li><a target="_blank" href="http://hg.python.org/cpython/file/05e8dde3229c/Python/pystate.c#l761">http://hg.python.org/cpython/file/05e8dde3229c/Python/pystate.c#l761</a>
     </ul>
 </section>
 
@@ -534,6 +534,7 @@ threading.Thread(target=f).start()
     <p>Each call to acquire() decrements the counter, release() increments it
     <p>If acquire() is called on a Semaphore with a counter of 0, it will block until the Semaphore counter is greater than 0.
     <p>Useful for controlling the maximum number of threads allowed to access a resource simultaneously
+    <p><img src="images/flags.jpg" />
 <p>
 <a target="_blank" href="http://en.wikipedia.org/wiki/Semaphore_(programming)">http://en.wikipedia.org/wiki/Semaphore_(programming)</a>
 </p>
@@ -573,6 +574,14 @@ proc.start()
 <pre><code>
 from multiprocessing import Queue, Lock
 </code></pre>
+    <p>multiprocessing.Pipe for 2-way process communication:
+<pre><code>
+from multiprocessing import Pipe
+parent_conn, child_conn = Pipe()
+child_conn.send("foo")
+print parent_conn.recv()
+</code></pre>
+
 </section>
 
 <section class="slide">
@@ -600,23 +609,35 @@ def f(x):
     return x*x
 
 if __name__ == '__main__':
-    pool = Pool(processes=4)              # start 4 worker processes
+    pool = Pool(processes=4)
 
-    result = pool.apply_async(f, (10,))    # evaluate "f(10)" asynchronously
-    print result.get(timeout=1)           # prints "100" unless your computer is *very* slow
+    result = pool.apply_async(f, (10,))
+    print result.get(timeout=1)
 
-    print pool.map(f, range(10))          # prints "[0, 1, 4,..., 81]"
+    print pool.map(f, range(10))
 
     it = pool.imap(f, range(10))
-    print it.next()                       # prints "0"
-    print it.next()                       # prints "1"
-    print it.next(timeout=1)              # prints "4" unless your computer is *very* slow
+    print it.next()
+    print it.next()
+    print it.next(timeout=1)
 
     import time
     result = pool.apply_async(time.sleep, (10,))
-    print result.get(timeout=1)           # raises TimeoutError
+    print result.get(timeout=1)
 </code></pre>
+
 <p><a target="_blank" href="http://docs.python.org/2/library/multiprocessing.html#module-multiprocessing.pool">http://docs.python.org/2/library/multiprocessing.html#module-multiprocessing.pool</a>
+</section>
+
+<section class="slide">
+    <h2>ThreadPool</h2>
+    <p>threading also has a pool
+    <p>confusingly, it lives in the multiprocessing module
+    <p>
+<pre><code>
+from multiprocessing.pool import ThreadPool
+pool = ThreadPool(processes=4)
+</code></pre>
 </section>
 
 <section class="slide">
