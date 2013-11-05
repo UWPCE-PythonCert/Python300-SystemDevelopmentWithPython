@@ -70,14 +70,13 @@
 
 <section class="slide">
     <h2>Big-O notation</h2>
-    <p>Computer scientists describe the efficency of an algorithm in “big O” notation.
+    <p>The efficency of an algorithm is often described in “big O” notation.
     <p>It describes how much longer a algorithm takes as a function of how much data it is working with
     <p>O(1) time stays the same regardless of how much data (adding to dicts)
     <p>O(n) goes up linearly with number of items (searching lists)
     <p>O(n2) goes up quadratically with number of items
     <p>O(log(n)) goes up with the log of how many items (bisection search)
 </section>
-
 
 <section class="slide">
     <h2>An optimization strategy</h2>
@@ -119,18 +118,14 @@ def expensive_function():
     <h2>timeit</h2>
 <p>Used for testing small bits of code</p>
 <p>Use to test hypotheses about efficiency of algorithms and Python idioms</p>
+<p>Can be run from the command line:
+
 <pre><code>
-import timeit
-statement = "char in text"
-setup_code = """ text = "sample string"; char = "g" """
-timeit.timeit(statement, setup=setup_code)
+python -m timeit '"-".join(str(n) for n in range(100))'
 </code></pre>
 <p>
 <a target="_blank" href="http://docs.python.org/library/timeit.html">http://docs.python.org/library/timeit.html</a>
-<br />
-<a target="_blank" href="http://ipython.org/ipython-doc/dev/api/generated/IPython.core.magics.execution.html?highlight=timeit#IPython.core.magics.execution.ExecutionMagics.timeit">http://ipython.org/ipython-doc/dev/api/generated/IPython.core.magics.execution.html?highlight=timeit#IPython.core.magics.execution.ExecutionMagics.timeit</a>
 
-</p>
 </section>
 
 <section class="slide">
@@ -154,24 +149,54 @@ $ python -m timeit -n 1000 -t "len([x**2 for x in range(1000)])"
 </section>
 
 <section class="slide">
-<h2>iPython's timeit magic</h2>
+    <h2>timeit</h2>
+
+<p>Or imported as a module 
+<p><a target="_blank" href="http://docs.python.org/2/library/timeit.html#timeit.timeit">http://docs.python.org/2/library/timeit.html#timeit.timeit</a>
+<p>timeit.timeit(stmt='pass', setup='pass', timer=&lt;default timer&gt;, number=1000000)
 <pre><code>
+import timeit
+statement = "char in text"
+setup_code = """text = "sample string";char = "g" """
+timeit.timeit(statement, setup=setup_code)
+</code></pre>
+</section>
+<section class="slide">
+    <h2>Or with iPython magic</h2>
+    <p>
+<pre><code>
+%timeit pass
+
+u = None
+
+%timeit u is None
+
+%timeit -r 4 u == None
+
+import time
+
+%timeit -n1 time.sleep(2)
+
 %timeit -n 10000 "f" in "food"
 </code></pre>
+<p>
+<a target="_blank" href="http://ipython.org/ipython-doc/dev/api/generated/IPython.core.magics.execution.html?highlight=timeit#IPython.core.magics.execution.ExecutionMagics.timeit">http://ipython.org/ipython-doc/dev/api/generated/IPython.core.magics.execution.html?highlight=timeit#IPython.core.magics.execution.ExecutionMagics.timeit</a>
+
+</p>
 </section>
 
 
 <section class="slide">
-    <h2>Lab work</h2>
+    <h2>Exercise!</h2>
+    <p>We just tried determining if a character exists in a string: %timeit -n 10000 "f" in "food"
 <ul>
-    <li>Run timeit with an alternative statement: "statement2 = 'text.find(char) >= 0'".   Which is faster?  Why?
-    <li>Run timeit on code from your project
+    <li>Run timeit with an alternative statement: "statement2 = 'text.find(char) &gt;= 0'".   Which is faster?  Why?
 </ul>
 </section>
 
 <section class="slide">
     <h2>Getting more detailed with Profiling</h2>
-    <p>A profiler takes measurements of runtime performance a summarizes results into a profile report. </p>
+    <p>A profiler takes measurements of runtime performance and summarizes results into a profile report</p>
     <p>Reported metrics could include
     <ul>
         <li>Memory used over time
@@ -192,6 +217,7 @@ $ python -m timeit -n 1000 -t "len([x**2 for x in range(1000)])"
     </ul>
     <p>
         <a target="_blank" href="http://docs.python.org/2/library/profile.html">http://docs.python.org/2/library/profile.html</a>
+    <p>
         <a target="_blank" href="http://docs.python.org/2/library/hotshot.html">http://docs.python.org/2/library/hotshot.html</a>
     </p>
 
@@ -201,7 +227,7 @@ $ python -m timeit -n 1000 -t "len([x**2 for x in range(1000)])"
     <h2>cProfiler</h2>
 <pre>
 <code>
-python -m cProfile -o profile_dump program_to_profile.py
+python -m cProfile program_to_profile.py
 
      11111128 function calls in 8.283 seconds
 
@@ -225,12 +251,13 @@ python -m cProfile -o profile_dump program_to_profile.py
 
 <section class="slide">
 <h2>Analyzing profile data</h2>
-<p>
-output to a binary dump with -o.   Dumpfile can be read with <br /><code>python -m pstats</code>
-</p>
-<p>
-While doing performance work, save your profiles for comparison later
-</p>
+    <p>
+        output to a binary dump with -o &lt;filename&gt;
+    </p>
+    <p>While doing performance work, save your profiles for comparison later</p>
+    <p>This helps ensure that any changes which reduce readability do actually increase performance
+    <p>A profile dump file can be read with <br /><code>python -m pstats</code>
+    </p>
 
 <pre>
 <code>
@@ -258,8 +285,30 @@ p.print_stats()
 </section>
 
 <section class="slide">
+    <h2>qcachegrind / kcachegrind</h2>
+    <p>profiling tool based on <a target="_blank" href="http://kcachegrind.sourceforge.net/html/Valgrind.html">Valgrind</a>
+    <p>a runtime instrumentation framework for Linux/x86
+    <p>Can be used with Python profile data with a profile format conversion
+    <p>Doesn't give all the information that a native valgrind run would provide
+<pre>
+<code>
+# convert python profile to calltree format
+pip install pyprof2calltree
+
+python -m cProfile -o dump.profile integrate_main.py
+pyprof2calltree -i dump.profile -o dump.callgrind
+</code>
+</pre>
+<p>
+<a target="_blank" href="http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindCalltreeFormat">http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindCalltreeFormat</a>
+</section>
+
+<section class="slide">
     <h2>Run Snake Run</h2>
-<img src="../images/runsnake.png" />
+    <p>A graphical profile viewer for Python
+    <p>
+<img src="images/runsnake.png" />
+    <p>
 <pre>
 <code>
 pip install RunSnakeRun
@@ -270,18 +319,9 @@ python runsnake.py dump.profile
 
 
 <section class="slide">
-    <h2>qcachegrind / kcachegrind</h2>
-    <p>First convert python profile to calltree format</p>
-<pre>
-<code>
-python -m cProfile -o dump.profile integrate_main.py
-pyprof2calltree -i dump.profile -o dump.callgrind
-</code>
-</pre>
-</section>
-
-<section class="slide">
     <h2>line profiler </h2>
+<p>line_profiler is a module for doing line-by-line profiling of functions
+<p>ships with a script, kernprof.py
 <pre>
 <code>
 % pip install line_profiler
@@ -290,7 +330,7 @@ pyprof2calltree -i dump.profile -o dump.callgrind
 <p>Now decorate the function you want to profile with @profile</p>
 <pre>
 <code>
-% kernprof.py -l -v mega_app.py
+% kernprof.py -l -v agg.py
 </code>
 </pre>
 <a target="_blank" href="http://pythonhosted.org/line_profiler/">http://pythonhosted.org/line_profiler/</a>
@@ -298,9 +338,17 @@ pyprof2calltree -i dump.profile -o dump.callgrind
 
 <section class="slide">
     <h2>pycallgraph</h2>
+    <p>Python Call Graph is a Python module that creates call graph visualizations
     <p>pycallgraph  ./mega_app.py</p>
-    <img src="../images/pycallgraph.png" />
+    <img height="100%" src="images/pycallgraph.png" />
 </section>
+
+<!--
+<section class="slide">
+    <h2>Meliae: Python memory analysis</h2>
+    <p><a target="_blank" href="https://launchpad.net/meliae">https://launchpad.net/meliae</a>
+</section>
+-->
 
 <section class="slide">
     <h2>boosting Python performance</h2>
@@ -381,6 +429,10 @@ def simple_app(environ, start_response):
     start_response(status, response_headers)
     return ['Hello world!\n']
 </code></pre>
+<p>
+frameworks with WSGI support:
+<br />
+<a target="_blank" href="http://wsgi.readthedocs.org/en/latest/frameworks.html">http://wsgi.readthedocs.org/en/latest/frameworks.html</a>
 </section>
 
 <section class="slide">

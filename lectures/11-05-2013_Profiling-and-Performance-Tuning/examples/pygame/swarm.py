@@ -42,11 +42,11 @@ if __name__ == "__main__":
 
     sun = Sun()
 
-    font = pygame.font.SysFont("helvetica", 55)
+    # font = pygame.font.SysFont("helvetica", 55)
     titlebar = pygame.Rect(0,0,200, 100)
     clock = pygame.time.Clock()
 
-    spheres = [Sphere() for i in xrange(1000)]
+    spheres = [Sphere() for i in xrange(5)]
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
@@ -63,9 +63,9 @@ if __name__ == "__main__":
 
         sun.draw()
 
-        label = font.render("fps %d" % fps, 1, (255,255,255))
+        # label = font.render("fps %d" % fps, 1, (255,255,255))
         pygame.draw.rect(screen, (0,0,0), titlebar)
-        screen.blit(label, (10, 10))
+        # screen.blit(label, (10, 10))
 
         pygame.display.flip()
 
